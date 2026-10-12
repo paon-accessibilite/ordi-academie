@@ -1,0 +1,15 @@
+{
+  "name": "ordi-academie",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Un ordinateur simulé pour apprendre les premiers gestes numériques",
+  "scripts": {
+    "test": "node verify.cjs",
+    "build": "node scripts/prepare-desktop.cjs",
+    "tauri": "tauri",
+    "windows:build": "npm run build && tauri build --bundles nsis"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.11.3"
+  }
+}

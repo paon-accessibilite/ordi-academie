@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main",
+  "description": "Fenêtre principale sans accès aux fichiers réels ni au réseau",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}

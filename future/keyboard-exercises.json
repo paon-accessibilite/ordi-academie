@@ -1,0 +1,50 @@
+[
+  {
+    "title": "Saisis ton premier mot",
+    "instruction": "Clique dans la zone de texte et écris bonjour, puis clique sur Vérifier.",
+    "hint": "Cherche les lettres une par une. Prends ton temps : il n’y a pas de chronomètre.",
+    "target": "bonjour",
+    "initial": "",
+    "skill": "typing"
+  },
+  {
+    "title": "Sépare les mots",
+    "instruction": "Écris le chat dort avec un espace entre chaque mot.",
+    "hint": "La grande barre en bas du clavier est la barre d’espace. Appuie une fois entre deux mots.",
+    "target": "le chat dort",
+    "initial": "",
+    "skill": "spaces"
+  },
+  {
+    "title": "Utilise les majuscules",
+    "instruction": "Écris Bonjour Tom avec un B et un T majuscules.",
+    "hint": "Maintiens la touche Maj pendant que tu appuies sur b ou t, puis relâche-la. Tu peux aussi utiliser Verr. Maj, puis la désactiver.",
+    "target": "Bonjour Tom",
+    "initial": "",
+    "skill": "capitals"
+  },
+  {
+    "title": "Ajoute les accents",
+    "instruction": "Écris élève à côté en gardant les accents et les espaces.",
+    "hint": "Repère é, è et à sur ton clavier. Pour ô, sur un clavier français courant, appuie sur l’accent circonflexe puis sur o. Les touches dépendent de ton clavier.",
+    "target": "élève à côté",
+    "initial": "",
+    "skill": "accents"
+  },
+  {
+    "title": "Corrige avec Retour arrière",
+    "instruction": "Le mot chatt a un t en trop. Place le curseur à la fin et appuie sur Retour arrière pour obtenir chat.",
+    "hint": "Retour arrière efface le caractère à gauche du curseur. Clique après le dernier t, ou utilise la touche Fin, puis appuie une fois sur Retour arrière.",
+    "target": "chat",
+    "initial": "chatt",
+    "skill": "backspace"
+  },
+  {
+    "title": "Corrige avec Suppr",
+    "instruction": "Le mot cchat a un c en trop. Place le curseur au début et appuie sur Suppr pour obtenir chat.",
+    "hint": "Suppr efface le caractère à droite du curseur. Clique avant le premier c, ou utilise la touche Début, puis appuie une fois sur Suppr.",
+    "target": "chat",
+    "initial": "cchat",
+    "skill": "delete"
+  }
+]

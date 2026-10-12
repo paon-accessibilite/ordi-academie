@@ -1,0 +1,28 @@
+name: Application Windows
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+jobs:
+  installer:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: npm run windows:build -- -- --locked
+      - run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/smoke-windows.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Ordi-Academie-Windows
+          path: src-tauri/target/release/bundle/nsis/*-setup.exe
