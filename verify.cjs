@@ -1,7 +1,7 @@
 // Vérification du parcours et des validations sans dépendance externe.
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const elements=new Map();
-function element(){return {hidden:false,value:'',textContent:'',children:[],dataset:{},style:{},offsetWidth:200,offsetHeight:100,classList:{add(){},remove(){},toggle(){}},append(...xs){this.children.push(...xs)},replaceChildren(){this.children=[]},setAttribute(name,value){this[name]=value},setSelectionRange(start,end){this.selectionStart=start;this.selectionEnd=end},addEventListener(){},showModal(){this.open=true},close(){this.open=false},focus(){},select(){}}}
+function element(){return {hidden:false,value:'',textContent:'',children:[],dataset:{},style:{},offsetWidth:200,offsetHeight:100,getBoundingClientRect(){return {left:parseFloat(this.style.left)||0,top:parseFloat(this.style.top)||0,width:parseFloat(this.style.width)||this.offsetWidth,height:parseFloat(this.style.height)||this.offsetHeight}},classList:{add(){},remove(){},toggle(){}},append(...xs){this.children.push(...xs)},replaceChildren(){this.children=[]},setAttribute(name,value){this[name]=value},setSelectionRange(start,end){this.selectionStart=start;this.selectionEnd=end},addEventListener(){},showModal(){this.open=true},close(){this.open=false},focus(){},select(){}}}
 const listeners=new Map();
 const document={body:element(),documentElement:{clientWidth:1024,clientHeight:768},getElementById(id){if(!elements.has(id))elements.set(id,element());return elements.get(id)},createElement:element,createTextNode:x=>x,addEventListener(name,handler){listeners.set(name,handler)}};
 // window.location est une propriété réservée non configurable du navigateur.
@@ -10,7 +10,7 @@ const globals={document,console,listeners,window:{addEventListener(){},localStor
 Object.defineProperty(globals,'location',{value:{href:'file:///index.html'},configurable:false});
 const context=vm.createContext(globals);
 vm.runInContext(fs.readFileSync('screen.js','utf8'),context);vm.runInContext(fs.readFileSync('profiles.js','utf8'),context);vm.runInContext(fs.readFileSync('file-clipboard.js','utf8'),context);vm.runInContext(fs.readFileSync('windows.js','utf8'),context);vm.runInContext(fs.readFileSync('practice.js','utf8'),context);vm.runInContext(fs.readFileSync('documents.js','utf8'),context);vm.runInContext(fs.readFileSync('advanced.js','utf8'),context);
-vm.runInContext(fs.readFileSync('journey.js','utf8'),context);vm.runInContext(fs.readFileSync('app.js','utf8'),context);
+vm.runInContext(fs.readFileSync('journey.js','utf8'),context);vm.runInContext(fs.readFileSync('desktop-gestures.js','utf8'),context);vm.runInContext(fs.readFileSync('app.js','utf8'),context);
 vm.runInContext(`
 $('startBasics').onclick();$('images').onclick(); if(!completed)throw Error('clic');
 $('next').onclick();listeners.get('keydown')({key:'Enter',target:{id:'images',tagName:'BUTTON'},preventDefault(){}});if(!completed||$('window').hidden)throw Error('clic puis Entrée');
@@ -71,6 +71,14 @@ $('minimizeFiles').onclick();if(!completed||!$('window').hidden||$('taskFiles').
 $('next').onclick();if(!$('window').hidden)throw Error('préparation fenêtre réduite');$('taskFiles').onclick();if(!completed||$('window').hidden)throw Error('restauration barre tâches');
 $('next').onclick();$('maximizeFiles').onclick();if(completed||!simWindows.files.max)throw Error('agrandissement');$('maximizeFiles').onclick();if(!completed||simWindows.files.max)throw Error('retour taille normale');
 $('next').onclick();$('close').onclick();if(!completed||!$('taskFiles').hidden||!$('window').hidden)throw Error('fermeture');
+$('desktop').offsetWidth=1000;$('desktop').offsetHeight=550;
+$('next').onclick();setWindowRect('files',{x:100,y:40,w:600,h:380});const widthBefore=windowRect('files');setWindowRect('files',{...widthBefore,w:650});checkWindowGeometry('files','resize',widthBefore);if(!completed)throw Error('largeur');
+$('next').onclick();setWindowRect('files',{x:100,y:40,w:600,h:380});const cornerBefore=windowRect('files');setWindowRect('files',{...cornerBefore,w:660,h:330});checkWindowGeometry('files','resize',cornerBefore);if(!completed)throw Error('coin');
+$('next').onclick();snapWindow('files','right');if(completed)throw Error('mauvais bord');snapWindow('files','left');if(!completed||simWindows.files.rect.w!==500)throw Error('demi gauche');
+$('next').onclick();snapWindow('files','right');if(!completed||simWindows.files.rect.x!==500)throw Error('demi droit');
+$('next').onclick();const titleHandle=document.createElement("div");titleHandle.setPointerCapture=()=>{};titleHandle.releasePointerCapture=()=>{};enableWindowGesture('files',titleHandle);
+const titleEvent=(x,y)=>({...pointerEvent(x,y),target:{closest(){return null}}});titleHandle.onpointerdown(titleEvent(250,16));titleHandle.onpointermove(titleEvent(550,120));titleHandle.onpointerup(titleEvent(550,120));if(!completed||simWindows.files.snap)throw Error('libération demi-écran');
+$('next').onclick();if($('editorPanel').hidden)throw Error('TAda non préparé');snapWindow('files','left');snapWindow('editor','left');if(completed)throw Error('même côté accepté');snapWindow('editor','right');if(!completed)throw Error('côte à côte');
 $('next').onclick();if(step!==fileClipboardStart)throw Error('transition presse-papiers OS');
 selected='clip-story';copySelected();if(completed)throw Error('copie mauvais fichier acceptée');selected='clip-poster';$('copy').onclick();if(!completed||entries.find(e=>e.id==='clip-poster').parent!=='root')throw Error('copie OS');
 $('next').onclick();selected='clip-poster';copySelected();openFolder('clip-archives');pasteClipboard();if(completed)throw Error('collage mauvais dossier accepté');openFolder('clip-class');pasteClipboard();if(!completed||entries.find(e=>e.id==='clip-poster').parent!=='root')throw Error('collage OS conserve original');
@@ -164,25 +172,25 @@ step=shortcutStart+1;prepareMission();mission();const eventInput=$('docText');ev
 $('reset').onclick();
 `,context);
 const reload=vm.createContext({...globals});
-vm.runInContext(fs.readFileSync('screen.js','utf8'),reload);vm.runInContext(fs.readFileSync('profiles.js','utf8'),reload);vm.runInContext(fs.readFileSync('file-clipboard.js','utf8'),reload);vm.runInContext(fs.readFileSync('windows.js','utf8'),reload);vm.runInContext(fs.readFileSync('practice.js','utf8'),reload);vm.runInContext(fs.readFileSync('documents.js','utf8'),reload);vm.runInContext(fs.readFileSync('advanced.js','utf8'),reload);vm.runInContext(fs.readFileSync('journey.js','utf8'),reload);vm.runInContext(fs.readFileSync('app.js','utf8'),reload);
+vm.runInContext(fs.readFileSync('screen.js','utf8'),reload);vm.runInContext(fs.readFileSync('profiles.js','utf8'),reload);vm.runInContext(fs.readFileSync('file-clipboard.js','utf8'),reload);vm.runInContext(fs.readFileSync('windows.js','utf8'),reload);vm.runInContext(fs.readFileSync('practice.js','utf8'),reload);vm.runInContext(fs.readFileSync('documents.js','utf8'),reload);vm.runInContext(fs.readFileSync('advanced.js','utf8'),reload);vm.runInContext(fs.readFileSync('journey.js','utf8'),reload);vm.runInContext(fs.readFileSync('desktop-gestures.js','utf8'),reload);vm.runInContext(fs.readFileSync('app.js','utf8'),reload);
 vm.runInContext("if(Object.keys(progressRecords).length!==missions.length||passedSteps.size)throw Error('rechargement carnet')",reload);
 const previousOrder=['Un premier clic','Ouvre le dossier','Crée un dossier','Donne un nom au fichier','Range ton image','Copie ton image','Renomme un dossier','Déplace un dossier','Utilise la corbeille','Répare une erreur','Trouve le bon fichier','Retrouve l’adresse du fichier','Place au bon endroit','Copie vers une autre branche','Construis un chemin','Le grand rangement','Vise avec le clic gauche','Choisis le clic droit','Entraîne le double-clic','Glisse sans lâcher','Crée un document texte','Nomme ton document','Enregistre au bon endroit','Retrouve et rouvre ton document'];
 const previousRecords={};const records=JSON.parse(saved.get('ordi-academie-achievements-v1'));previousOrder.forEach((title,id)=>previousRecords[id]=Object.values(records).find(r=>r.title===title));
 const reordered=vm.createContext({...globals,window:{addEventListener(){},localStorage:{getItem(){return JSON.stringify(previousRecords)},setItem(){}}}});
-for(const file of ['screen.js','profiles.js','file-clipboard.js','windows.js','practice.js','documents.js','advanced.js','journey.js','app.js'])vm.runInContext(fs.readFileSync(file,'utf8'),reordered);
+for(const file of ['screen.js','profiles.js','file-clipboard.js','windows.js','practice.js','documents.js','advanced.js','journey.js','desktop-gestures.js','app.js'])vm.runInContext(fs.readFileSync(file,'utf8'),reordered);
 vm.runInContext("if(Object.keys(progressRecords).length!==24||!progressRecords[basicStart]||!progressRecords[documentStart+3]||progressRecords[windowStart]||missions[0][0]!=='Vise avec le clic gauche')throw Error('migration du parcours précédent')",reordered);
 const legacyRecords=JSON.parse(saved.get('ordi-academie-achievements-v1'));
 const oldRecords={};for(const [id,record] of Object.entries(legacyRecords)){oldRecords[Number(id)<10?Number(id):Number(id)+6]={...record,title:record.title==='Retrouve l’adresse du fichier'?'Lis le chemin':record.title}}
 const legacy=vm.createContext({...globals,window:{addEventListener(){},localStorage:{getItem(){return JSON.stringify(oldRecords)},setItem(){}}}});
-vm.runInContext(fs.readFileSync('screen.js','utf8'),legacy);vm.runInContext(fs.readFileSync('profiles.js','utf8'),legacy);vm.runInContext(fs.readFileSync('file-clipboard.js','utf8'),legacy);vm.runInContext(fs.readFileSync('windows.js','utf8'),legacy);vm.runInContext(fs.readFileSync('practice.js','utf8'),legacy);vm.runInContext(fs.readFileSync('documents.js','utf8'),legacy);vm.runInContext(fs.readFileSync('advanced.js','utf8'),legacy);vm.runInContext(fs.readFileSync('journey.js','utf8'),legacy);vm.runInContext(fs.readFileSync('app.js','utf8'),legacy);
+vm.runInContext(fs.readFileSync('screen.js','utf8'),legacy);vm.runInContext(fs.readFileSync('profiles.js','utf8'),legacy);vm.runInContext(fs.readFileSync('file-clipboard.js','utf8'),legacy);vm.runInContext(fs.readFileSync('windows.js','utf8'),legacy);vm.runInContext(fs.readFileSync('practice.js','utf8'),legacy);vm.runInContext(fs.readFileSync('documents.js','utf8'),legacy);vm.runInContext(fs.readFileSync('advanced.js','utf8'),legacy);vm.runInContext(fs.readFileSync('journey.js','utf8'),legacy);vm.runInContext(fs.readFileSync('desktop-gestures.js','utf8'),legacy);vm.runInContext(fs.readFileSync('app.js','utf8'),legacy);
 vm.runInContext("if(Object.keys(progressRecords).length!==missions.length-1||progressRecords[pathStart+1]||!progressRecords[mouseStart+3]||badgeDefinitions().length!==10)throw Error('migration ancien carnet')",legacy);
 const noStorage=vm.createContext({...globals,window:{addEventListener(){},localStorage:{getItem(){throw Error('stockage interdit')},setItem(){throw Error('stockage interdit')}}}});
-vm.runInContext(fs.readFileSync('screen.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('profiles.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('file-clipboard.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('windows.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('practice.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('documents.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('advanced.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('journey.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('app.js','utf8'),noStorage);
+vm.runInContext(fs.readFileSync('screen.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('profiles.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('file-clipboard.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('windows.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('practice.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('documents.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('advanced.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('journey.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('desktop-gestures.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('app.js','utf8'),noStorage);
 vm.runInContext("$('startBasics').onclick();$('images').onclick();if(!completed||progressAvailable||!progressRecords[basicStart])throw Error('repli sans stockage')",noStorage);
-console.log('49 missions : fichiers, chemins, souris, documents TAda, saisie, presse-papiers, raccourcis, extensions masquées, doublons, corbeille, badges et sauvegarde : OK');
+console.log('55 missions : fichiers, chemins, souris, documents TAda, saisie, presse-papiers, raccourcis, extensions masquées, doublons, corbeille, badges et sauvegarde : OK');
 
 const profileContext=vm.createContext({...globals});
-for(const file of ['profiles.js','file-clipboard.js','windows.js','practice.js','documents.js','advanced.js','journey.js','app.js'])vm.runInContext(fs.readFileSync(file,'utf8'),profileContext);
+for(const file of ['profiles.js','file-clipboard.js','windows.js','practice.js','documents.js','advanced.js','journey.js','desktop-gestures.js','app.js'])vm.runInContext(fs.readFileSync(file,'utf8'),profileContext);
 vm.runInContext(`
 if(!$('sessionShell').hidden||$('loginScreen').hidden||activeProfile)throw Error('connexion non obligatoire');
 const createStudent=name=>{$('addProfile').onclick();$('profileName').value=name;$('profileForm').onsubmit({preventDefault(){}});return studentProfiles.find(p=>p.name===name)};
@@ -199,12 +207,12 @@ if(JSON.parse(window.localStorage.getItem('ordi-academie-student-'+eva.id))[basi
 const evaId=eva.id;disconnectProfile();
 `,profileContext);
 const profileReload=vm.createContext({...globals});
-for(const file of ['profiles.js','file-clipboard.js','windows.js','practice.js','documents.js','advanced.js','journey.js','app.js'])vm.runInContext(fs.readFileSync(file,'utf8'),profileReload);
+for(const file of ['profiles.js','file-clipboard.js','windows.js','practice.js','documents.js','advanced.js','journey.js','desktop-gestures.js','app.js'])vm.runInContext(fs.readFileSync(file,'utf8'),profileReload);
 vm.runInContext(`const restored=studentProfiles.find(p=>p.name==='Éva');if(!restored||!$('sessionShell').hidden)throw Error('rechargement profils');connectProfile(restored.id);if(Object.keys(progressRecords).length!==1||documentDraft.content!=='Bonjour Éva, brouillon')throw Error('rechargement session élève');`,profileReload);
 console.log('Profils : accueil, création, doublons, connexion, bureaux et badges séparés, brouillons et rechargement : OK');
 
 const fallbackProfiles=vm.createContext({...globals,window:{addEventListener(){},localStorage:{getItem(){throw Error('stockage interdit')},setItem(){throw Error('stockage interdit')}}}});
-for(const file of ['profiles.js','file-clipboard.js','windows.js','practice.js','documents.js','advanced.js','journey.js','app.js'])vm.runInContext(fs.readFileSync(file,'utf8'),fallbackProfiles);
+for(const file of ['profiles.js','file-clipboard.js','windows.js','practice.js','documents.js','advanced.js','journey.js','desktop-gestures.js','app.js'])vm.runInContext(fs.readFileSync(file,'utf8'),fallbackProfiles);
 vm.runInContext(`$('addProfile').onclick();$('profileName').value='Session temporaire';$('profileForm').onsubmit({preventDefault(){}});const temporary=studentProfiles.find(p=>p.name==='Session temporaire');connectProfile(temporary.id);$('startBasics').onclick();$('images').onclick();disconnectProfile();connectProfile(temporary.id);if(!progressRecords[basicStart]||profilesAvailable)throw Error('profils sans stockage');`,fallbackProfiles);
 console.log('Profils sans stockage : séparation et reprise pendant la visite : OK');
 
@@ -216,7 +224,7 @@ console.log('Affichage : profils limités à quatre par page : OK');
 
 const replayElements=new Map();
 const replayContext=vm.createContext({...globals,document:{...document,getElementById(id){if(!replayElements.has(id))replayElements.set(id,element());return replayElements.get(id)}},window:{addEventListener(){},confirm(){return true},localStorage:{getItem(){return null},setItem(){}}}});
-for(const file of ['screen.js','profiles.js','file-clipboard.js','windows.js','practice.js','documents.js','advanced.js','journey.js','app.js'])vm.runInContext(fs.readFileSync(file,'utf8'),replayContext);
+for(const file of ['screen.js','profiles.js','file-clipboard.js','windows.js','practice.js','documents.js','advanced.js','journey.js','desktop-gestures.js','app.js'])vm.runInContext(fs.readFileSync(file,'utf8'),replayContext);
 vm.runInContext(`
 window.confirm=()=>true;
 const earnedBefore=Object.keys(progressRecords).length;
@@ -238,7 +246,39 @@ studentProfiles.push(old);documentDraft.dirty=false;connectProfile(old.id);if(!b
 if(!$('startBasics')['aria-label'].includes('badge obtenu')||$('startOrganizer')['aria-label'].includes('badge obtenu'))throw Error('sections vertes confondent les badges');
 replayMission(basicStep(2));$('followingSteps').onclick();if($('steps').children.length!==3||visibleBadgeSteps().length!==8)throw Error('pagination du badge Organisateur');
 `,replayContext);
-console.log('Reprise des 49 missions, documents autonomes, félicitations et anciens badges : OK');
+console.log('Reprise des 55 missions, documents autonomes, félicitations et anciens badges : OK');
+vm.runInContext(`
+documentDraft.dirty=false;replayMission(basicStep(4));
+const fileSource=()=>{const b=$('files').children.find(el=>el.dataset.entryId==='photo');b.setPointerCapture=()=>{};b.releasePointerCapture=()=>{};b.cloneNode=()=>{const ghost=document.createElement('button');ghost.removeAttribute=()=>{};ghost.remove=()=>ghost.removed=true;return ghost};return b};
+const fileEvent=(x,y)=>({button:0,pointerId:42,clientX:x,clientY:y,preventDefault(){}});
+let source=fileSource();document.elementsFromPoint=()=>[];source.onpointerdown(fileEvent(50,50));source.onpointermove(fileEvent(100,100));const ghost=document.body.children.at(-1);if(ghost.style.left!=='112px')throw Error('fichier immobile');source.onpointerup(fileEvent(100,100));if(entries.find(e=>e.id==='photo').parent!=='root'||!ghost.removed)throw Error('dépôt hors dossier');
+const destination=$('files').children.find(el=>el.dataset.entryId==='animals');destination.closest=()=>destination;document.elementsFromPoint=()=>[destination];source=fileSource();source.onpointerdown(fileEvent(50,50));source.onpointermove(fileEvent(150,100));source.onpointerup(fileEvent(150,100));if(!completed||entries.find(e=>e.id==='photo').parent!=='animals')throw Error('Range ton image par glissement');
+$('desktop').offsetWidth=1000;$('desktop').offsetHeight=550;documentDraft.dirty=false;replayMission(windowStart+4);setWindowRect('files',{x:100,y:40,w:600,h:380});
+const edge=document.createElement('button');edge.setPointerCapture=()=>{};edge.releasePointerCapture=()=>{};enableWindowGesture('files',edge,'e');
+const winEvent=(x,y)=>({...fileEvent(x,y),target:{closest(){return null}}});edge.onpointerdown(winEvent(700,100));edge.onpointermove(winEvent(760,100));edge.onpointerup(winEvent(760,100));if(!completed||simWindows.files.rect.w!==660)throw Error('poignée ne redimensionne pas');
+snapWindow('files','left',false);const bar=document.createElement('div');bar.setPointerCapture=()=>{};bar.releasePointerCapture=()=>{};enableWindowGesture('files',bar);bar.onpointerdown(winEvent(250,20));bar.onpointermove(winEvent(500,90));bar.onpointercancel(winEvent(500,90));if(simWindows.files.snap!=='left')throw Error('annulation décroche fenêtre');
+documentDraft.content='Brouillon conservé';documentDraft.dirty=true;showSimWindow('editor');snapWindow('editor','right',false);minimizeSimWindow('editor');restoreSimWindow('editor');if(documentDraft.content!=='Brouillon conservé'||simWindows.editor.snap!=='right')throw Error('géométrie perd brouillon');
+const snapshot=profileSnapshot();if(snapshot.windows.editor.snap!=='right'||!snapshot.windows.editor.rect)throw Error('position non sauvegardée');
+`,replayContext);
+console.log('Glissement de fichiers, poignées, accrochage, annulation et brouillons : OK');
+const deleteElements=new Map(),deleteStorage=new Map();
+const deleteContext=vm.createContext({...globals,document:{...document,getElementById(id){if(!deleteElements.has(id))deleteElements.set(id,element());return deleteElements.get(id)}},window:{addEventListener(){},localStorage:{getItem(key){return deleteStorage.get(key)||null},setItem(key,value){deleteStorage.set(key,value)},removeItem(key){deleteStorage.delete(key)}}}});
+for(const file of ['screen.js','profiles.js','file-clipboard.js','windows.js','practice.js','documents.js','advanced.js','journey.js','desktop-gestures.js','app.js'])vm.runInContext(fs.readFileSync(file,'utf8'),deleteContext);
+vm.runInContext(`
+const createForDelete=name=>{$('addProfile').onclick();$('profileName').value=name;$('profileForm').onsubmit({preventDefault(){}});return studentProfiles.find(p=>p.name===name)};
+const doomed=createForDelete('Profil à supprimer'),kept=createForDelete('Profil à garder');
+window.localStorage.setItem('ordi-academie-student-'+doomed.id,'données du profil à supprimer');window.localStorage.setItem('ordi-academie-student-'+kept.id,'données à garder');
+const openDelete=profile=>{$('profileList').children[studentProfiles.indexOf(profile)].oncontextmenu({clientX:100,clientY:100,preventDefault(){},stopPropagation(){}});if(profileMenu.hidden)throw Error('menu caché');profileMenu.children[0].onclick()};
+const submitDelete=()=> $('deleteProfileForm').onsubmit({preventDefault(){}});
+openDelete(doomed);submitDelete();if(studentProfiles.length!==2||pendingProfileDeletion.stage!==1)throw Error('suppression trop tôt');
+$('deleteProfileName').value='mauvais profil';submitDelete();if(pendingProfileDeletion.stage!==1||!$('deleteProfileError').textContent)throw Error('mauvais nom accepté');
+$('deleteProfileName').value=doomed.name;submitDelete();if(studentProfiles.length!==2||pendingProfileDeletion.stage!==2)throw Error('suppression avant dernière confirmation');$('cancelDeleteProfile').onclick();if(studentProfiles.length!==2||pendingProfileDeletion)throw Error('annulation supprime');
+openDelete(doomed);submitDelete();$('deleteProfileName').value=doomed.name;submitDelete();submitDelete();if(studentProfiles.length!==1||studentProfiles[0].id!==kept.id||window.localStorage.getItem('ordi-academie-student-'+doomed.id)!==null||window.localStorage.getItem('ordi-academie-student-'+kept.id)!=='données à garder')throw Error('suppression mêle les profils');
+const stored=JSON.parse(window.localStorage.getItem(profilesKey));if(stored.length!==1||stored[0].id!==kept.id)throw Error('profil supprimé revient au rechargement');
+openDelete(kept);submitDelete();$('deleteProfileName').value=kept.name;submitDelete();const storageSetter=window.localStorage.setItem;window.localStorage.setItem=()=>{throw Error('stockage refusé')};submitDelete();if(studentProfiles.length!==1||!$('deleteProfileError').textContent)throw Error('échec stockage supprime le profil');window.localStorage.setItem=storageSetter;$('cancelDeleteProfile').onclick();
+const legacyToDelete={id:'legacy',name:'Ancien carnet',avatar:'🦉',records:{}};studentProfiles.push(legacyToDelete);window.localStorage.setItem(progressKey,'ancien carnet partagé');writeProfiles();renderProfiles();openDelete(legacyToDelete);submitDelete();$('deleteProfileName').value=legacyToDelete.name;submitDelete();submitDelete();if(window.localStorage.getItem(progressKey)!==null||studentProfiles.some(p=>p.id==='legacy'))throw Error('ancien carnet supprimé renaît');
+`,deleteContext);
+console.log('Suppression des profils : trois confirmations, nom, annulation, données séparées et stockage refusé : OK');
 
 // Une réponse vocale arrivée après Annuler ne doit pas redémarrer la lecture.
 context.URL={createObjectURL(){return 'blob:test'},revokeObjectURL(){}};

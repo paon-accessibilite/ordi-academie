@@ -26,7 +26,7 @@ function badgeDefinitions(){return [
   {name:'Organisateur',icon:'📁',steps:Array.from({length:8},(_,i)=>basicStep(i+2)),skill:'Créer, renommer, déplacer, copier et restaurer'},
   {name:'Explorateur des chemins',icon:'🧭',steps:Array.from({length:6},(_,i)=>i+pathStart),skill:'Lire un chemin et trouver le bon fichier'},
   {name:'Souris agile',icon:'🐭',steps:Array.from({length:4},(_,i)=>i+mouseStart),skill:'Clic gauche, clic droit, double-clic et glisser-déposer'},
-  {name:'Maître des fenêtres',icon:'▣',steps:Array.from({length:4},(_,i)=>i+windowStart),skill:'Réduire, retrouver, agrandir, restaurer et fermer'},
+  {name:'Maître des fenêtres',icon:'▣',steps:Array.from({length:windowExercises.length},(_,i)=>i+windowStart),skill:'Réduire, retrouver, agrandir, fermer, redimensionner et travailler en demi-écran'},
   {name:'Fichiers bien rangés',icon:'⧉',steps:Array.from({length:4},(_,i)=>i+fileClipboardStart),skill:'Copier, coller, couper et déplacer un dossier avec son contenu'},
   {name:'Auteur en herbe',icon:'📝',steps:Array.from({length:4},(_,i)=>i+documentStart),skill:'Créer, nommer, enregistrer et retrouver un document'},
   {name:'Clavier apprivoisé',icon:'⌨️',steps:Array.from({length:5},(_,i)=>i+writingStart),skill:'Espaces, majuscules, accents, Retour arrière et Suppr'},
@@ -106,7 +106,7 @@ function prepareAdvancedMission(){
 function renderAdvancedExercise(){
   $('challengePanel').hidden=!(isPathMission()&&step===pathStart+1);$('checkChallenge').hidden=!isPathMission();$('retryChallenge').hidden=!isPathMission();$('mousePanel').hidden=!isMouseMission();
   $('docCheck').hidden=!isDocumentMission()||step===documentStart+2||step===documentStart+3||currentTextExercise()?.skill==='save';renderTextPractice();
-  if(!isDocumentMission())hideSimWindow('editor');
+  if(!isDocumentMission()&&step!==windowStart+9)hideSimWindow('editor');
   $('desktop').hidden=isMouseMission();if(isPathMission()){$('desktop').hidden=false;const read=step===pathStart+1;$('pathChoices').hidden=!read;if(read)renderPathChoices();renderBreadcrumb()}
   if(isMouseMission()){$('desktop').hidden=true;mouseHits=0;mouseWrong=0;mouseFirstClick=null;mouseDragging=false;renderMouseTarget()}
 }

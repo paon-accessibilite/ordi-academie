@@ -2,7 +2,7 @@
 
 ## Version 0.2.0 Windows — à valider
 
-49 missions, avec quatre nouveaux exercices de navigation regroupés dans le
+55 missions, avec quatre nouveaux exercices de navigation regroupés dans le
 badge **Premier bureau** : entrer dans Animaux, descendre dans Chats, remonter
 au parent et retrouver la racine. La consigne et la validation sont renforcées.
 Le badge en cours et son compteur restent visibles à gauche ; la réussite
@@ -15,7 +15,7 @@ de missions et gardent les badges déjà obtenus. Un nouveau badge ouvre un écr
 de félicitations avec ses compétences ; **collecter** anime son icône vers
 **Mes badges**. La préférence système de réduction des animations est respectée.
 
-Tests : parcours et migration dans `npm test`, reprise des 49 missions et
+Tests : parcours et migration dans `npm test`, reprise des 55 missions et
 géométrie des consignes/boutons dans le moteur Windows. En 1280 × 720, le bureau
 occupe environ 941 × 506 px (73,5 % de la largeur, 70,3 % de la hauteur).
 La version Linux et la publication de la v0.2 attendent la validation utilisateur.
@@ -37,7 +37,7 @@ Xfce isolé sans réseau. Ce test ne remplace pas un essai sur un PC Mint physiq
 
 Prototype pédagogique autonome en français, sans installation ni connexion.
 
-Ouvrir `index.html` dans Firefox, Chrome ou Edge sous Windows ou Linux. Les 49 missions enseignent les gestes souris, la gestion des fichiers et dossiers, les chemins, les fenêtres et le traitement de texte. Un écran de connexion permet de créer et choisir un profil élève. Le bureau, les documents, les brouillons et le carnet de réussites sont conservés localement pour chaque profil quand le stockage du navigateur est disponible.
+Ouvrir `index.html` dans Firefox, Chrome ou Edge sous Windows ou Linux. Les 55 missions enseignent les gestes souris, la gestion des fichiers et dossiers, les chemins, les fenêtres et le traitement de texte. Un écran de connexion permet de créer et choisir un profil élève. Le bureau, les documents, les brouillons et le carnet de réussites sont conservés localement pour chaque profil quand le stockage du navigateur est disponible.
 
 Le bouton 🔊 à côté de la consigne, du coup de pouce ou de la demande de saisie lit son texte. Un second clic arrête la lecture, ainsi que le changement de mission. La synthèse vocale du navigateur privilégie une voix française locale lorsqu'elle est disponible. La disponibilité des voix et leur fonctionnement hors connexion dépendent du navigateur et du système ; un message apparaît si la lecture ne peut pas démarrer. Aucun service audio externe ni clé API n'est configuré dans ce projet.
 
@@ -72,19 +72,19 @@ Le carnet fournit une date de réussite, les consultations du coup de pouce et l
 
 Les badges indiquent des exercices réussis dans le simulateur. Ils servent de repère pour poursuivre la pratique sur un vrai ordinateur.
 
-Vérifications automatiques : `node verify.cjs` (49 missions, menus contextuels, déplacements, copies, homonymes et chemins incorrects, clic puis Entrée, corbeille, casse, gestes souris, obtention et rechargement des badges, synthèse vocale simulée). Ce test ne confirme pas le son effectivement joué sur l'ordinateur.
+Vérifications automatiques : `node verify.cjs` (55 missions, menus contextuels, déplacements, copies, homonymes et chemins incorrects, clic puis Entrée, corbeille, casse, gestes souris, obtention et rechargement des badges, synthèse vocale simulée). Ce test ne confirme pas le son effectivement joué sur l'ordinateur.
 
 Les profils sont locaux et ne sont pas synchronisés entre les ordinateurs. Il n’y a pas de tableau de bord centralisé. Les gestes doivent ensuite être pratiqués sur un vrai bureau avec l'accompagnement d'un adulte.
 
 Pour un aperçu HTTP : `python -m http.server 8080 --bind 127.0.0.1` puis ouvrir http://127.0.0.1:8080.
 
-## Manipuler les fenêtres (missions 25 à 28)
+## Manipuler les fenêtres (missions 25 à 34)
 
-Après la souris (1–4), les fichiers et dossiers (5–18) et les chemins (19–24), quatre missions enseignent Réduire, retrouver avec la barre des tâches, Agrandir puis restaurer la taille normale, et Fermer. Le badge **Maître des fenêtres** exige ces quatre réussites. **Atelier fenêtres** permet un accès direct.
+Après la souris (1–4), les fichiers et dossiers (5–18) et les chemins (19–24), dix missions enseignent Réduire, retrouver avec la barre des tâches, Agrandir puis restaurer la taille normale, et Fermer. Le badge **Maître des fenêtres** comprend aussi six défis de poignées, de demi-écran et de placement côte à côte. Les badges obtenus avant cet ajout sont conservés. **Atelier fenêtres** permet un accès direct.
 
 L’explorateur et TAda disposent des mêmes trois boutons dans leur barre de titre. Agrandir remplit uniquement le bureau simulé. Réduire conserve la fenêtre ouverte et le texte non enregistré ; cliquer sur son bouton dans la barre des tâches la restaure. Fermer retire son bouton de la barre. Les fenêtres peuvent passer devant l’autre en cliquant dessus. Le carnet retrouve les réussites par leur titre malgré le nouvel ordre des missions.
 
-## Atelier documents (missions 33 à 36)
+## Atelier documents (missions 39 à 42)
 
 L’éditeur TAda simplifié s’ouvre dans une fenêtre à l’intérieur du bureau simulé, avec réduction, agrandissement et fermeture. Le raccourci **TAda** s’ouvre par double-clic ou clic puis Entrée. **Atelier documents** lance les quatre missions : créer un document et saisir une courte invitation libre ; nommer Invitation ; enregistrer dans Mes images / Classe / Invitations ; fermer TAda, retrouver Invitation et le rouvrir. Le badge **Auteur en herbe** exige les quatre réussites.
 
@@ -94,15 +94,15 @@ Le bureau et les brouillons sont sauvegardés pour le profil lorsque la session 
 
 Le fichier document-preview.html reste une ancienne maquette indépendante ; l’atelier intégré se trouve dans index.html. Les anciens modèles clavier sont conservés dans future/keyboard-exercises.json comme archive de la première progression.
 
-## Écrire dans TAda (missions 37 à 41)
+## Écrire dans TAda (missions 43 à 47)
 
 Chaque mission ouvre un document d’entraînement dans la même fenêtre TAda. L’élève travaille les espaces, les majuscules, les accents, Retour arrière puis Suppr. Le modèle reste visible et Vérifier valide le texte. Réessayer restaure le texte initial. Les espaces, la casse et les accents sont vérifiés précisément dans ces exercices ; les noms de fichiers restent insensibles à la casse. Les accents Unicode équivalents sont acceptés. Les exercices Retour arrière et Suppr exigent une suppression effective avec la bonne touche, sans sélection.
 
-## Copier, couper et coller (missions 42 à 44)
+## Copier, couper et coller (missions 48 à 50)
 
 La barre de TAda propose Copier, Couper, Coller et Annuler. Trois missions distinguent une copie qui conserve l’original, un collage qui duplique le mot et un déplacement par couper/coller. La sélection peut se faire à la souris ou au clavier. Les commandes utilisent un presse-papiers de texte interne à TAda, indépendant du presse-papiers des fichiers et de celui du système. Il reste disponible entre les documents pendant la visite ; chaque mission commence avec un presse-papiers vide. Annuler revient sur les modifications de la feuille, avec un historique de 100 changements par document.
 
-## Raccourcis avancés (missions 45 à 49)
+## Raccourcis avancés (missions 51 à 55)
 
 Accès direct avec Raccourcis avancés. Les missions enseignent Ctrl+A, Ctrl+C / Ctrl+V, Ctrl+X / Ctrl+V, Ctrl+Z et Ctrl+S. Les commandes des boutons restent disponibles comme aide, mais ces missions exigent les raccourcis demandés. Ctrl+S ouvre la boîte d’enregistrement de TAda et doit réellement enregistrer le bon texte dans le bon dossier. Les raccourcis sont interceptés dans la feuille TAda ; Ctrl+S fonctionne aussi depuis son champ de nom. Les autres champs et le reste de la page gardent leur comportement normal.
 
@@ -110,7 +110,7 @@ Accès direct avec Raccourcis avancés. Les missions enseignent Ctrl+A, Ctrl+C /
 
 Les documents texte portent une icône bleue avec le T de TAda et s’ouvrent dans TAda. Les extensions connues sont masquées dans l’explorateur, les listes Ouvrir, les chemins affichés, les consignes et le champ Renommer. Elles restent conservées dans les données : renommer Invitation en Fête conserve .txt ; une copie devient Invitation (copie 1), sans exposer l’extension.
 
-## Presse-papiers du bureau (missions 29 à 32)
+## Presse-papiers du bureau (missions 35 à 38)
 
 Avant TAda, quatre missions enseignent Copier un fichier, Coller sa copie dans Classe, Couper/coller un fichier et Couper/coller un dossier avec son contenu. Accès direct : Copier et déplacer des fichiers. Les boutons et menus contextuels proposent Couper ; Ctrl+X est disponible dans l’explorateur. Un élément coupé devient pâle, reste dans son dossier jusqu’au collage, puis est déplacé sans duplication. Un collage dans le même dossier ou dans un descendant est refusé ; le presse-papiers reste disponible pour corriger la destination. Le badge Fichiers bien rangés exige les quatre réussites.
 
@@ -137,3 +137,19 @@ Les profils sont paginés par quatre ; le carnet affiche les dix badges ou les r
 Le dossier src-tauri contient l’enveloppe native Tauri. L’interface est embarquée, sans serveur local à démarrer. L’application démarre en plein écran ; son bouton et Échap utilisent la fenêtre native. L’installeur NSIS en français embarque WebView2 et s’installe pour l’utilisateur courant.
 
 Construction : npm ci --ignore-scripts, npm test, puis npm run windows:build -- -- --locked. Le script scripts/smoke-windows.ps1 vérifie l’exécutable dans WebView2 avec une fenêtre cachée et un stockage de test isolé. Le workflow GitHub Application Windows produit aussi l’installeur et son artifact. Les données des élèves, caches et sorties de compilation sont exclus du dépôt.
+
+## Déplacer, redimensionner et accrocher les fenêtres
+
+Les fichiers se déplacent avec maintien du clic gauche et dépôt sur un dossier,
+sans dépendre du glisser-déposer natif du navigateur. Les menus restent disponibles.
+L’explorateur et TAda disposent de huit poignées (bords et coins), de tailles
+minimales et d’un déplacement par la barre de titre. Le dépôt sur un bord latéral
+accroche la fenêtre sur une moitié du bureau ; un déplacement vers le centre
+la libère. Réduire et restaurer conservent la disposition et le brouillon.
+Les tailles et les demi-écrans sont enregistrés dans le profil élève.
+
+Sur l’écran de connexion, un clic droit sur un profil ouvre sa gestion discrète
+(également accessible avec Maj+F10). La suppression demande un avertissement,
+la saisie du nom du profil, puis une confirmation finale. Annuler ou Échap ferme
+le dialogue sans effacer de données. Les autres profils sont conservés. Si le
+stockage local refuse l’opération, la suppression est bloquée et signalée.
