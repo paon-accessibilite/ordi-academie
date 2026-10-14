@@ -113,6 +113,7 @@ export GST_PLUGIN_SCANNER="$runtime/usr/lib/x86_64-linux-gnu/gstreamer1.0/gstrea
 export GDK_PIXBUF_MODULE_FILE="$base/loaders.cache"
 # Xfce utilise X11 ; évite les différences de pilotes EGL sur les vieux PC.
 export WEBKIT_DISABLE_DMABUF_RENDERER=1
+export WEBKIT_DISABLE_COMPOSITING_MODE=1
 exec "$base/ordi-academie" "$@"
 ''')
 launcher.chmod(0o755)
