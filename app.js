@@ -133,7 +133,7 @@ function openContextMenu(ev,id=null){
   const margin=8;
   contextMenu.style.left=Math.max(margin,Math.min(ev.clientX,document.documentElement.clientWidth-contextMenu.offsetWidth-margin))+'px';
   contextMenu.style.top=Math.max(margin,Math.min(ev.clientY,document.documentElement.clientHeight-contextMenu.offsetHeight-margin))+'px';
-  contextMenu.children[0].focus();
+  contextMenu.children[0].focus({preventScroll:true});
 }
 $('files').oncontextmenu=ev=>{const file=ev.target.closest('.file');openContextMenu(ev,file?file.dataset.entryId:null)};
 // WebKitGTK peut ouvrir le menu dès la pression du bouton droit.

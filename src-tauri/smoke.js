@@ -38,10 +38,15 @@
   documentDraft.dirty=false;replayMission(basicStep(2));
   if($('badgeCelebration').open)$('badgeCelebration').close();
   const rightClick=async target=>{
+    await new Promise(resolve=>setTimeout(resolve,150));
     const rect=target.getBoundingClientRect();
+    report.rightClickEvents=[];
+    const trace=event=>report.rightClickEvents.push({type:event.type,button:event.button,target:event.target.id||event.target.className,hidden:contextMenu.hidden});
+    for(const name of ['pointerdown','pointerup','contextmenu','scroll'])document.addEventListener(name,trace,true);
     const native=await window.__TAURI__.core.invoke('desktop_smoke_right_click',{x:Math.round(rect.left+rect.width/2),y:Math.round(rect.top+rect.height/2)});
     if(!native)target.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,button:2,clientX:rect.left+10,clientY:rect.top+10}));
     await new Promise(resolve=>setTimeout(resolve,150));
+    for(const name of ['pointerdown','pointerup','contextmenu','scroll'])document.removeEventListener(name,trace,true);
     assert(!contextMenu.hidden,'Clic droit : menu visible après le relâchement');
     const item=contextMenu.children[0],hit=item.getBoundingClientRect();
     assert(contextMenu.contains(document.elementFromPoint(hit.left+hit.width/2,hit.top+hit.height/2)),'Menu au-dessus de la fenêtre et accessible au clic');

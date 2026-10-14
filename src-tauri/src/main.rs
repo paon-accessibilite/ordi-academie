@@ -54,7 +54,7 @@ async fn desktop_smoke_right_click(state: tauri::State<'_, SmokeReport>, x: i32,
             let output = std::process::Command::new("xdotool").args(["search", "--onlyvisible", "--pid", &pid]).output().map_err(|e| e.to_string())?;
             let ids = String::from_utf8_lossy(&output.stdout);
             let id = ids.lines().next().ok_or("Fenêtre de test introuvable")?;
-            let result = std::process::Command::new("xdotool").args(["mousemove", "--window", id, &x.to_string(), &y.to_string(), "click", "3"]).status().map_err(|e| e.to_string())?;
+            let result = std::process::Command::new("xdotool").args(["mousemove", "--window", id, &x.to_string(), &y.to_string(), "sleep", "0.1", "click", "3"]).status().map_err(|e| e.to_string())?;
             if !result.success() { return Err("Clic X11 impossible".into()); }
             Ok(true)
         }).await.map_err(|e| e.to_string())?
