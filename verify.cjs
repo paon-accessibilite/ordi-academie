@@ -204,3 +204,21 @@ console.log('Affichage : pagination missions, pagination enseignant et rapport c
 
 vm.runInContext(`for(let i=0;i<6;i++)studentProfiles.push({id:'page-test-'+i,name:'Page '+i,avatar:'🦊',records:{}});profilePage=0;renderProfiles();if($('profileList').children.length>4)throw Error('trop de profils 720p');$('followingProfiles').onclick();if(profilePage!==1||$('profileList').children.length>4)throw Error('pagination profils');`,fallbackProfiles);
 console.log('Affichage : profils limités à quatre par page : OK');
+
+// Une réponse vocale arrivée après Annuler ne doit pas redémarrer la lecture.
+context.URL={createObjectURL(){return 'blob:test'},revokeObjectURL(){}};
+context.Blob=class {constructor(parts){this.parts=parts}};
+context.Audio=class {constructor(){this.paused=true}play(){this.paused=false;return Promise.resolve()}pause(){this.paused=true}};
+vm.runInContext(`(async()=>{
+  stopSpeech();let resolveAudio;
+  window.__TAURI__={core:{invoke(){return new Promise(resolve=>resolveAudio=resolve)}}};
+  const pending=readAloud('Bonjour',$('readInstruction'));stopSpeech();resolveAudio([1,2,3]);await pending;
+  if(nativeSpeechAudio||speakingButton)throw Error('lecture relancée après arrêt');
+  window.__TAURI__.core.invoke=async()=>[1,2,3];
+  await readAloud('Bonjour',$('readInstruction'));if(!nativeSpeechAudio||nativeSpeechAudio.paused)throw Error('audio natif non démarré');
+  nativeSpeechAudio.onended();if(nativeSpeechAudio||speakingButton||nativeSpeechUrl)throw Error('ressources audio conservées après lecture');
+  window.__TAURI__.core.invoke=async()=>{throw Error('Piper indisponible')};
+  await readAloud('Bonjour',$('readInstruction'));if($('speechStatus').hidden||speakingButton)throw Error('erreur voix native non signalée');
+  delete window.__TAURI__;
+  console.log('Voix native : lecture, arrêt, réponse tardive et erreur : OK');
+})()`,context).catch(error=>{console.error(error);process.exitCode=1});
