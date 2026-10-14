@@ -5,6 +5,7 @@ release/
 .qa/
 *.log
 scripts/github-local.py
+scripts/linux-ci-local.py
 src-tauri/gen/
 src-tauri/piper/
 linux-build/

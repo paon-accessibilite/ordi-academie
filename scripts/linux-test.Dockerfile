@@ -6,5 +6,5 @@ COPY scripts/test-linux.sh /test-linux.sh
 # dpkg installe sans apt : aucune dépendance du paquet ne peut être téléchargée.
 RUN dpkg -i /tmp/app.deb && rm /tmp/app.deb && chmod +x /test-linux.sh && mkdir /result
 # Utilisateur non privilégié : le bac à sable WebKit reste actif.
-RUN useradd -m -u 1000 eleve && mkdir -p /tmp/ordi-qa && chown eleve /tmp/ordi-qa
+RUN useradd -m -u 1001 eleve && mkdir -p /tmp/ordi-qa && chown eleve /tmp/ordi-qa
 CMD ["bash", "/test-linux.sh"]

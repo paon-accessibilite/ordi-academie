@@ -54,6 +54,7 @@ async fn desktop_speech(app: tauri::AppHandle, text: String) -> Result<Option<Ve
         tauri::async_runtime::spawn_blocking(move || {
             let root = app.path().resource_dir().map_err(|e| e.to_string())?.join("piper");
             let mut child = std::process::Command::new(root.join("piper"))
+                .env("LD_LIBRARY_PATH", format!("{}:{}", root.display(), std::env::var("LD_LIBRARY_PATH").unwrap_or_default()))
                 .args(["--model", root.join("voices/fr_FR-siwis-medium.onnx").to_str().ok_or("Chemin de voix invalide")?, "--output_raw"])
                 .stdin(std::process::Stdio::piped()).stdout(std::process::Stdio::piped()).stderr(std::process::Stdio::null())
                 .spawn().map_err(|e| e.to_string())?;

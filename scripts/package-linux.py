@@ -37,7 +37,8 @@ manifest = []
 for name in sorted(packages):
     # Les dépendances virtuelles n'ont pas d'archive ; leur fournisseur figure
     # dans la clôture des autres dépendances réelles (et les tests vérifient ldd).
-    metadata = sp.check_output(['apt-cache', 'show', name], text=True, stderr=sp.DEVNULL)
+    metadata_result = sp.run(['apt-cache', 'show', name], text=True, stdout=sp.PIPE, stderr=sp.DEVNULL)
+    metadata = metadata_result.stdout
     if 'Filename:' not in metadata:
         continue
     run('apt-get', 'download', name, cwd=archives, stdout=sp.DEVNULL)
