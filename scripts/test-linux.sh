@@ -8,6 +8,7 @@ if [ "${1:-}" != '--user' ]; then
   exit
 fi
 mkdir -p /tmp/ordi-qa
+pulseaudio --start --exit-idle-time=-1
 for run in 1 2; do
   timeout 90s dbus-run-session -- xvfb-run -a -s '-screen 0 1280x720x24' \
     ordi-academie --smoke-test /tmp/ordi-qa/report.json

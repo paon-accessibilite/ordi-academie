@@ -20,7 +20,12 @@
   assert(await window.__TAURI__.core.invoke('desktop_fullscreen',{enabled:null})===false,'Commande plein écran native');
   report.voices=window.speechSynthesis?.getVoices().map(v=>({lang:v.lang,local:v.localService}))||[];
   const wav=await window.__TAURI__.core.invoke('desktop_speech',{text:'Bienvenue dans Ordi Académie. Crée un dossier.'});
-  if(wav){assert(wav.length>1000&&String.fromCharCode(...wav.slice(0,4))==='RIFF','Voix française embarquée : audio généré');report.audioBytes=wav.length}
+  if(wav){
+    assert(wav.length>1000&&String.fromCharCode(...wav.slice(0,4))==='RIFF','Voix française embarquée : audio généré');report.audioBytes=wav.length;
+    await readAloud('Bonjour.',$('readInstruction'));
+    assert(nativeSpeechAudio&&!nativeSpeechAudio.paused,'Bouton haut-parleur : lecture audio démarrée');
+    stopSpeech();assert(nativeSpeechAudio===null,'Bouton haut-parleur : arrêt audio');
+  }
   report.geometry={width:innerWidth,height:innerHeight,desktopWidth:desktop.width,desktopHeight:desktop.height};
   disconnectProfile();report.ok=true;
  }catch(error){report.error=String(error.stack||error)}
