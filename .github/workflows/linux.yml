@@ -17,6 +17,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: src-tauri -> target
+          cache-on-failure: true
       - name: Dépendances de compilation
         run: |
           sudo apt-get update
@@ -29,6 +30,7 @@ jobs:
           docker build -t ordi-test -f scripts/linux-test.Dockerfile .
           docker run --rm --network none --shm-size=512m -v "$PWD/release:/result" ordi-test
       - name: Conserver les fichiers validés
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: Ordi-Academie-Linux
