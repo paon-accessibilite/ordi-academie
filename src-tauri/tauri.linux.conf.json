@@ -1,0 +1,10 @@
+{
+  "bundle": {
+    "targets": ["deb"],
+    "resources": {
+      "piper/": "piper/",
+      "../THIRD-PARTY-NOTICES.txt": "THIRD-PARTY-NOTICES.txt",
+      "../INSTALLATION-LINUX.md": "LIRE-MOI-LINUX.md"
+    }
+  }
+}

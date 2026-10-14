@@ -1,0 +1,40 @@
+name: Application Linux autonome
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  deb:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+      - name: Dépendances de compilation
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf apt-rdepends
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: npm run linux:build
+      - name: Installation et test hors ligne dans un système Xfce isolé
+        run: |
+          docker build -t ordi-test -f scripts/linux-test.Dockerfile .
+          docker run --rm --network none --shm-size=512m -v "$PWD/release:/result" ordi-test
+      - name: Conserver les fichiers validés
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ordi-Academie-Linux
+          path: release/*linux*
+      - name: Publication du téléchargement validé
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload v0.1.0 release/Ordi-Academie-0.1.0-linux-amd64.deb release/SHA256SUMS-linux.txt release/validation-linux.json

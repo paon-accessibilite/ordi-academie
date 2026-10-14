@@ -7,7 +7,8 @@
     "test": "node verify.cjs",
     "build": "node scripts/prepare-desktop.cjs",
     "tauri": "tauri",
-    "windows:build": "npm run build && tauri build --bundles nsis"
+    "windows:build": "npm run build && tauri build --bundles nsis",
+    "linux:build": "bash scripts/build-linux.sh"
   },
   "devDependencies": {
     "@tauri-apps/cli": "2.11.3"

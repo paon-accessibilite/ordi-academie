@@ -16,7 +16,7 @@ fn main() {
     let smoke_report = report.clone();
     tauri::Builder::default()
         .manage(SmokeReport(report))
-        .invoke_handler(tauri::generate_handler![desktop_fullscreen, desktop_smoke_report])
+        .invoke_handler(tauri::generate_handler![desktop_fullscreen, desktop_smoke_report, desktop_speech])
         .setup(move |app| {
             let mut builder = tauri::WebviewWindowBuilder::from_config(app, &app.config().app.windows[0])?;
             if let Some(path) = &smoke_report {
@@ -39,6 +39,37 @@ fn main() {
         })
         .run(tauri::generate_context!())
         .expect("Impossible de démarrer Ordi Académie");
+}
+
+// La voix est embarquée sur Linux ; Windows conserve ses voix système.
+#[tauri::command]
+async fn desktop_speech(app: tauri::AppHandle, text: String) -> Result<Option<Vec<u8>>, String> {
+    #[cfg(not(target_os = "linux"))]
+    { let _ = (app, text); Ok(None) }
+    #[cfg(target_os = "linux")]
+    {
+        use tauri::Manager;
+        use std::io::Write;
+        if text.chars().count() > 4000 { return Err("Consigne trop longue".into()); }
+        tauri::async_runtime::spawn_blocking(move || {
+            let root = app.path().resource_dir().map_err(|e| e.to_string())?.join("piper");
+            let mut child = std::process::Command::new(root.join("piper"))
+                .args(["--model", root.join("voices/fr_FR-siwis-medium.onnx").to_str().ok_or("Chemin de voix invalide")?, "--output_raw"])
+                .stdin(std::process::Stdio::piped()).stdout(std::process::Stdio::piped()).stderr(std::process::Stdio::null())
+                .spawn().map_err(|e| e.to_string())?;
+            child.stdin.take().ok_or("Entrée vocale indisponible")?.write_all(format!("{}\n", text.replace(['\r', '\n'], " ")).as_bytes()).map_err(|e| e.to_string())?;
+            let output = child.wait_with_output().map_err(|e| e.to_string())?;
+            if !output.status.success() || output.stdout.is_empty() { return Err("La voix française n'a pas pu démarrer".into()); }
+            let pcm = output.stdout;
+            let size = u32::try_from(pcm.len()).map_err(|e| e.to_string())?;
+            let mut wav = Vec::with_capacity(pcm.len() + 44);
+            wav.extend(b"RIFF"); wav.extend((size + 36).to_le_bytes()); wav.extend(b"WAVEfmt ");
+            wav.extend(16u32.to_le_bytes()); wav.extend(1u16.to_le_bytes()); wav.extend(1u16.to_le_bytes());
+            wav.extend(22050u32.to_le_bytes()); wav.extend(44100u32.to_le_bytes());
+            wav.extend(2u16.to_le_bytes()); wav.extend(16u16.to_le_bytes()); wav.extend(b"data"); wav.extend(size.to_le_bytes()); wav.extend(pcm);
+            Ok(Some(wav))
+        }).await.map_err(|e| e.to_string())?
+    }
 }
 
 #[tauri::command]

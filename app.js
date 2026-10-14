@@ -158,14 +158,36 @@ document.addEventListener('keydown',ev=>{
 });
 
 
-let speakingButton=null,speechRequest=0;
+let speakingButton=null,speechRequest=0,nativeSpeechAudio=null,nativeSpeechUrl=null;
 function stopSpeech(){
   speechRequest++;
+  if(nativeSpeechAudio){nativeSpeechAudio.pause();nativeSpeechAudio=null}
+  if(nativeSpeechUrl){URL.revokeObjectURL(nativeSpeechUrl);nativeSpeechUrl=null}
   if(window.speechSynthesis)window.speechSynthesis.cancel();
   if(speakingButton){speakingButton.textContent='🔊';speakingButton.setAttribute('aria-pressed','false');speakingButton=null}
 }
-function readAloud(text,button){
+async function readAloud(text,button){
   const alreadyReading=speakingButton===button;stopSpeech();if(alreadyReading)return;
+  if(window.__TAURI__?.core?.invoke){
+    const request=speechRequest;
+    speakingButton=button;button.textContent='⏹';button.setAttribute('aria-pressed','true');
+    $('speechStatus').hidden=true;
+    try{
+      const bytes=await window.__TAURI__.core.invoke('desktop_speech',{text});
+      if(request!==speechRequest)return;
+      if(bytes){
+        nativeSpeechUrl=URL.createObjectURL(new Blob([new Uint8Array(bytes)],{type:'audio/wav'}));
+        nativeSpeechAudio=new Audio(nativeSpeechUrl);
+        nativeSpeechAudio.onended=()=>{if(request===speechRequest)stopSpeech()};
+        nativeSpeechAudio.onerror=()=>{if(request===speechRequest){stopSpeech();$('speechStatus').hidden=false;$('speechStatus').textContent='La lecture audio est indisponible. Vérifie la sortie sonore.'}};
+        await nativeSpeechAudio.play();return;
+      }
+      speakingButton=null;button.textContent='🔊';button.setAttribute('aria-pressed','false');
+    }catch(error){
+      if(request!==speechRequest)return;
+      stopSpeech();$('speechStatus').hidden=false;$('speechStatus').textContent='La voix française n’a pas pu démarrer.';return;
+    }
+  }
   const synth=window.speechSynthesis;
   if(!synth||!window.SpeechSynthesisUtterance){$('speechStatus').hidden=false;$('speechStatus').textContent='La lecture vocale n’est pas disponible dans ce navigateur.';return}
   $('speechStatus').hidden=true;

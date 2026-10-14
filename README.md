@@ -2,6 +2,12 @@
 
 **Version Windows 0.1.0 disponible avec installeur.** [Télécharger](https://github.com/paon-accessibilite/ordi-academie/releases/tag/v0.1.0) · [Instructions Windows](INSTALLATION-WINDOWS.md)
 
+**Version Linux Mint 22.3 Xfce (amd64).** Paquet `.deb` avec moteur d'affichage et
+voix française hors ligne embarqués. [Instructions Linux](INSTALLATION-LINUX.md).
+La chaîne GitHub Actions compile sous Ubuntu 24.04 et vérifie l'installation,
+deux lancements avec reprise des profils et la désinstallation dans un système
+Xfce isolé sans réseau. Ce test ne remplace pas un essai sur un PC Mint physique.
+
 Prototype pédagogique autonome en français, sans installation ni connexion.
 
 Ouvrir `index.html` dans Firefox, Chrome ou Edge sous Windows ou Linux. Les 45 missions enseignent les gestes souris, la gestion des fichiers et dossiers, les chemins, les fenêtres et le traitement de texte. Un écran de connexion permet de créer et choisir un profil élève. Le bureau, les documents, les brouillons et le carnet de réussites sont conservés localement pour chaque profil quand le stockage du navigateur est disponible.

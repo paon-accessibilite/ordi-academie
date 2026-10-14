@@ -6,3 +6,5 @@ release/
 *.log
 scripts/github-local.py
 src-tauri/gen/
+src-tauri/piper/
+linux-build/
