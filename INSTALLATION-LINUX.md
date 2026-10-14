@@ -3,7 +3,7 @@
 Cible : Linux Mint 22.3 Xfce, PC 64 bits (amd64).
 
 Ouvrir le fichier `.deb` avec l'installateur de paquets, puis choisir Installer.
-On peut également utiliser `sudo dpkg -i Ordi-Academie-0.2.0-linux-amd64.deb`.
+On peut également utiliser `sudo dpkg -i Ordi-Academie-0.2.1-linux-amd64.deb`.
 L'installation et l'utilisation ne demandent pas de connexion Internet.
 Lancer Ordi Académie depuis le menu Éducation. Échap quitte le plein écran.
 

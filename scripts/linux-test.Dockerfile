@@ -1,6 +1,6 @@
 FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y --no-install-recommends xfce4 xvfb xauth dbus-x11 python3 ca-certificates pulseaudio && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends xfce4 xvfb xauth dbus-x11 python3 ca-certificates pulseaudio xdotool && rm -rf /var/lib/apt/lists/*
 COPY release/Ordi-Academie-*-linux-amd64.deb /tmp/app.deb
 COPY scripts/test-linux.sh /test-linux.sh
 # dpkg installe sans apt : aucune dépendance du paquet ne peut être téléchargée.

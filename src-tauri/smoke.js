@@ -1,6 +1,6 @@
 (async()=>{
  const checks=[];const assert=(value,label)=>{if(!value)throw Error(label);checks.push(label)};
- const report={version:'0.2.0',ok:false,checks};
+ const report={version:'0.2.1',ok:false,checks};
  try{
   assert(missions.length===55,'55 missions chargées dans le moteur embarqué');
   assert(!$('loginScreen').hidden&&$('sessionShell').hidden,'Écran de connexion au démarrage');
@@ -35,6 +35,25 @@
   assert(document.querySelectorAll('.resize-handle').length===16,'Huit poignées sur chaque fenêtre');
   assert(typeof document.querySelector('.titlebar').onpointerdown==='function'&&typeof document.querySelector('.tada-heading').onpointerdown==='function','Barres de titre déplaçables');
   assert($('editorPanel').scrollHeight===$('editorPanel').clientHeight,'TAda tient en demi-écran');
+  documentDraft.dirty=false;replayMission(basicStep(2));
+  if($('badgeCelebration').open)$('badgeCelebration').close();
+  const rightClick=async target=>{
+    const rect=target.getBoundingClientRect();
+    const native=await window.__TAURI__.core.invoke('desktop_smoke_right_click',{x:Math.round(rect.left+rect.width/2),y:Math.round(rect.top+rect.height/2)});
+    if(!native)target.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,button:2,clientX:rect.left+10,clientY:rect.top+10}));
+    await new Promise(resolve=>setTimeout(resolve,150));
+    assert(!contextMenu.hidden,'Clic droit : menu visible après le relâchement');
+    return native;
+  };
+  // Un espace vide de la grille, en dehors des icônes.
+  const grid=$('files').getBoundingClientRect();
+  const blankPoint={getBoundingClientRect(){return {left:grid.right-28,top:grid.bottom-28,width:4,height:4}},dispatchEvent:event=>$('files').dispatchEvent(event)};
+  report.nativeRightClick=await rightClick(blankPoint);
+  assert(contextMenu.children[0].textContent==='Nouveau dossier','Clic droit dans Organisateur : Nouveau dossier');
+  contextMenu.children[0].click();assert($('dialog').open,'Clic droit ouvre la création de dossier');$('dialog').close();
+  replayMission(basicStep(3));await rightClick(document.querySelector('.file[data-entry-id="photo"]'));
+  assert(selected==='photo'&&contextMenu.children[0].textContent==='Renommer','Clic droit sur le fichier : Renommer');
+  contextMenu.children[0].click();assert($('dialog').open,'Clic droit ouvre le renommage');$('dialog').close();
   documentDraft.dirty=false;replayMission(basicStep(2));showDialog('create');$('name').value='Animaux';$('form').onsubmit({preventDefault(){}});
   tell('Après la réussite');assert($('feedback').textContent.includes('Mission réussie'),'Réussite reste affichée');
   celebrateBadge('Premier bureau');assert($('badgeCelebration').open&&$('celebrationSkills').textContent.includes('sous-dossier'),'Félicitations avec compétences');

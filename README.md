@@ -1,6 +1,9 @@
 # Ordi Académie
 
-## Version 0.2.0 Windows et Linux
+## Windows 0.2.0 et Linux 0.2.1
+
+La version Linux 0.2.1 rétablit les menus du clic droit dans Organisateur,
+avec un test de clic réel sous X11 pour la création et le renommage.
 
 55 missions, avec quatre nouveaux exercices de navigation regroupés dans le
 badge **Premier bureau** : entrer dans Animaux, descendre dans Chats, remonter

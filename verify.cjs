@@ -21,6 +21,11 @@ $('next').onclick();openFolder('root');if(!completed)throw Error('retour racine'
 $('next').onclick();
 const rightClick=(target)=>({target,clientX:1000,clientY:750,preventDefault(){this.prevented=true},stopPropagation(){}});
 const blank=rightClick({closest(){return null},focus(){}}); $('files').oncontextmenu(blank);
+contextMenu.contains=()=>false;
+closeFileContextOutside({...blank,button:2});if(contextMenu.hidden)throw Error('clic droit referme le menu');
+closeContextMenu();$('files').onpointerdown({...blank,button:2});if(contextMenu.hidden)throw Error('pression droite sans contextmenu');
+closeFileContextOutside({...blank,button:0});if(!contextMenu.hidden)throw Error('clic gauche extérieur ne ferme pas');
+$('files').oncontextmenu(blank);
 if(!blank.prevented||contextMenu.hidden||contextMenu.children[0].textContent!=='Nouveau dossier')throw Error('menu espace vide');
 if(parseInt(contextMenu.style.left)+contextMenu.offsetWidth>1024)throw Error('menu hors écran');
 contextMenu.children[0].onclick(); if(!contextMenu.hidden)throw Error('fermeture menu');

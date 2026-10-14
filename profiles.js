@@ -104,7 +104,7 @@ function disconnectProfile(){
 function initializeProfiles(){
  profileMenu=document.createElement('div');profileMenu.className='profile-context-menu';profileMenu.hidden=true;profileMenu.setAttribute('role','menu');profileMenu.setAttribute('aria-label','Gestion du profil');document.body.append(profileMenu);
  profileMenu.onkeydown=event=>{if(event.key==='Escape'){event.preventDefault();closeProfileMenu()}};
- document.addEventListener('pointerdown',event=>{if(!profileMenu.contains(event.target))closeProfileMenu()});window.addEventListener('resize',closeProfileMenu);
+ document.addEventListener('pointerdown',event=>{if(event.button!==2&&!profileMenu.contains(event.target))closeProfileMenu()});window.addEventListener('resize',closeProfileMenu);
  $('deleteProfileForm').onsubmit=event=>{event.preventDefault();submitProfileDeletion()};$('cancelDeleteProfile').onclick=()=>{$('deleteProfileDialog').close();pendingProfileDeletion=null};$('deleteProfileDialog').addEventListener('close',()=>pendingProfileDeletion=null);
  try{const loaded=JSON.parse(window.localStorage.getItem(profilesKey)||'[]');if(Array.isArray(loaded)){const ids=new Set();studentProfiles=loaded.filter(p=>p&&typeof p.id==='string'&&!ids.has(p.id)&&typeof p.name==='string'&&p.name.trim()&&p.name.length<=32&&profileAvatars.includes(p.avatar)&&(ids.add(p.id),true));}}catch{profilesAvailable=false}
  // L’ancien carnet partagé reste distinct des nouveaux élèves.

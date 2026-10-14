@@ -16,7 +16,7 @@ fn main() {
     let smoke_report = report.clone();
     tauri::Builder::default()
         .manage(SmokeReport(report))
-        .invoke_handler(tauri::generate_handler![desktop_fullscreen, desktop_smoke_report, desktop_speech])
+        .invoke_handler(tauri::generate_handler![desktop_fullscreen, desktop_smoke_report, desktop_smoke_right_click, desktop_speech])
         .setup(move |app| {
             let mut builder = tauri::WebviewWindowBuilder::from_config(app, &app.config().app.windows[0])?;
             if let Some(path) = &smoke_report {
@@ -39,6 +39,26 @@ fn main() {
         })
         .run(tauri::generate_context!())
         .expect("Impossible de démarrer Ordi Académie");
+}
+
+// Test Linux : vrai clic X11, réservé au processus lancé avec --smoke-test.
+#[tauri::command]
+async fn desktop_smoke_right_click(state: tauri::State<'_, SmokeReport>, x: i32, y: i32) -> Result<bool, String> {
+    if state.0.is_none() { return Err("Le mode test est désactivé".into()); }
+    #[cfg(not(target_os = "linux"))]
+    { let _ = (x, y); Ok(false) }
+    #[cfg(target_os = "linux")]
+    {
+        let pid = std::process::id().to_string();
+        tauri::async_runtime::spawn_blocking(move || {
+            let output = std::process::Command::new("xdotool").args(["search", "--onlyvisible", "--pid", &pid]).output().map_err(|e| e.to_string())?;
+            let ids = String::from_utf8_lossy(&output.stdout);
+            let id = ids.lines().next().ok_or("Fenêtre de test introuvable")?;
+            let result = std::process::Command::new("xdotool").args(["mousemove", "--window", id, &x.to_string(), &y.to_string(), "click", "3"]).status().map_err(|e| e.to_string())?;
+            if !result.success() { return Err("Clic X11 impossible".into()); }
+            Ok(true)
+        }).await.map_err(|e| e.to_string())?
+    }
 }
 
 // La voix est embarquée sur Linux ; Windows conserve ses voix système.
