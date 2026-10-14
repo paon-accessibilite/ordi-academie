@@ -27,7 +27,7 @@ r=json.load(open('/tmp/ordi-qa/report.json'))
 print(json.dumps(r, ensure_ascii=False, indent=2))
 assert r['ok'], r
 assert r['audioBytes']>1000
-assert r['nativeRightClick'], 'Le clic droit doit être testé par X11'
+assert r['nativeRightClick'], 'Native X11 right click was not tested'
 if sys.argv[1]=='2': assert r['existingSuccesses']>=4, 'Les profils ne persistent pas'
 PY
 done
