@@ -37,6 +37,10 @@ function validSession(session){
 function connectProfile(id){
  const profile=studentProfiles.find(p=>p.id===id);if(!profile)return;
  activeProfile=profile;resetDocumentDraft();$('reset').onclick();progressRecords=readProfileProgress(profile);progressAvailable=profilesAvailable;
+ if(profile.journeyVersion!==2){
+   profile.earnedBadges=badgeDefinitions().filter(b=>b.name==='Premier bureau'?progressRecords[basicStart]&&progressRecords[basicStart+1]:b.steps.every(i=>progressRecords[i])).map(b=>b.name);
+   profile.journeyVersion=2;writeProfiles();
+ }
  lastOpenedEntry=null;documentClosed=false;pathChoice='';
  for(const key of Object.keys(progressRecords))passedSteps.add(Number(key));
  const session=profile.session;
@@ -55,7 +59,7 @@ function connectProfile(id){
  $('loginScreen').hidden=true;$('sessionShell').hidden=false;$('badgePanel').hidden=true;renderBadges();tell('Bienvenue '+profile.name+' ! Ton bureau est prêt.');$('logoutProfile').focus();
 }
 function disconnectProfile(){
- stopSpeech();closeContextMenu();saveActiveProfile();for(const id of ['dialog','docDialog','filePreview'])if($(id).open)$(id).close();
+ stopSpeech();closeContextMenu();saveActiveProfile();for(const id of ['dialog','docDialog','filePreview','badgeCelebration'])if($(id).open)$(id).close();
  resetDocumentDraft();resetSimWindows();activeProfile=null;progressRecords={};passedSteps.clear();lessonStats.clear();selectedProfileId=null;$('sessionShell').hidden=true;$('loginScreen').hidden=false;renderProfiles();$('addProfile').focus();
 }
 function initializeProfiles(){
@@ -65,7 +69,7 @@ function initializeProfiles(){
  const avatars=$('profileAvatar');avatars.replaceChildren();profileAvatars.forEach(avatar=>{const option=document.createElement('option');option.value=avatar;option.textContent=avatar;avatars.append(option)});avatars.value=profileAvatars[0];
  $('addProfile').onclick=()=>{$('profileError').textContent='';$('profileName').value='';$('profileDialog').showModal();$('profileName').focus()};$('cancelProfile').onclick=()=>{$('profileDialog').close()};
  $('profileForm').onsubmit=event=>{event.preventDefault();const name=$('profileName').value.trim().normalize('NFC').replace(/\s+/g,' ');if(!name||name.length>32){$('profileError').textContent='Écris un prénom ou un pseudo (32 caractères maximum).';return}if(studentProfiles.some(p=>sameName(p.name,name))){$('profileError').textContent='Ce nom existe déjà. Ajoute par exemple une initiale pour distinguer les élèves.';return}
-   const avatar=profileAvatars.includes($('profileAvatar').value)?$('profileAvatar').value:profileAvatars[0];let id;do{id='student-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,9)}while(studentProfiles.some(p=>p.id===id));studentProfiles.push({id,name,avatar,records:{}});selectedProfileId=id;profilePage=Math.floor((studentProfiles.length-1)/4);writeProfiles();renderProfiles();$('profileDialog').close();$('connectProfile').focus();
+   const avatar=profileAvatars.includes($('profileAvatar').value)?$('profileAvatar').value:profileAvatars[0];let id;do{id='student-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,9)}while(studentProfiles.some(p=>p.id===id));studentProfiles.push({id,name,avatar,records:{},journeyVersion:2,earnedBadges:[]});selectedProfileId=id;profilePage=Math.floor((studentProfiles.length-1)/4);writeProfiles();renderProfiles();$('profileDialog').close();$('connectProfile').focus();
  };
  $('previousProfiles').onclick=()=>{profilePage=Math.max(0,profilePage-1);renderProfiles()};$('followingProfiles').onclick=()=>{profilePage=Math.min(Math.max(0,Math.ceil(studentProfiles.length/4)-1),profilePage+1);renderProfiles()};
  $('connectProfile').onclick=()=>connectProfile(selectedProfileId);$('logoutProfile').onclick=disconnectProfile;

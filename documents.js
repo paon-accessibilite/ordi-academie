@@ -12,10 +12,18 @@ function seedDocumentFiles(){
   selected=null;currentFolder='root';clipboard=null;documentClosed=false;resetDocumentDraft();hideSimWindow('files');renderFiles();
 }
 function resetDocumentDraft(){documentDraft={id:null,name:'Sans titre',content:'',dirty:false,created:false};hideSimWindow('editor');resetTextTools(true);renderDocument()}
-function prepareDocumentMission(){
+function prepareDocumentMission(fresh=false){
   if(!isDocumentMission())return false;
   if(currentTextExercise())return prepareTextPractice();
-  if(step===documentStart)seedDocumentFiles();
+  if(step===documentStart||fresh)seedDocumentFiles();
+  if(fresh&&step>documentStart){
+    documentDraft={id:null,name:step===documentStart+1?'Sans titre':'Invitation',content:'Venez à notre exposition !',dirty:true,created:true};
+    if(step===documentStart+3){
+      entries.push({id:'invitation-document',name:'Invitation.txt',type:'text',parent:'invitations',content:documentDraft.content});
+      documentDraft.id='invitation-document';documentDraft.dirty=false;
+    }
+    showEditor();
+  }
   if(step===documentStart+3){documentClosed=false;}
   return true;
 }

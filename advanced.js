@@ -22,8 +22,8 @@ function isMouseMission(){return step>=mouseStart&&step<mouseStart+mouseExercise
 function noteHelp(){const stats=lessonStats.get(step)||{help:0,attempts:0};stats.help++;lessonStats.set(step,stats)}
 function noteAttempt(){const stats=lessonStats.get(step)||{help:0,attempts:0};stats.attempts++;lessonStats.set(step,stats)}
 function badgeDefinitions(){return [
-  {name:'Premiers gestes',icon:'🌱',steps:[basicStart,basicStart+1],skill:'Sélectionner et ouvrir'},
-  {name:'Organisateur',icon:'📁',steps:Array.from({length:8},(_,i)=>i+basicStart+2),skill:'Créer, renommer, déplacer, copier et restaurer'},
+  {name:'Premier bureau',icon:'🌱',steps:Array.from({length:6},(_,i)=>basicStart+i),skill:'Sélectionner, ouvrir un dossier, entrer dans un sous-dossier et revenir à la racine'},
+  {name:'Organisateur',icon:'📁',steps:Array.from({length:8},(_,i)=>basicStep(i+2)),skill:'Créer, renommer, déplacer, copier et restaurer'},
   {name:'Explorateur des chemins',icon:'🧭',steps:Array.from({length:6},(_,i)=>i+pathStart),skill:'Lire un chemin et trouver le bon fichier'},
   {name:'Souris agile',icon:'🐭',steps:Array.from({length:4},(_,i)=>i+mouseStart),skill:'Clic gauche, clic droit, double-clic et glisser-déposer'},
   {name:'Maître des fenêtres',icon:'▣',steps:Array.from({length:4},(_,i)=>i+windowStart),skill:'Réduire, retrouver, agrandir, restaurer et fermer'},
@@ -34,21 +34,24 @@ function badgeDefinitions(){return [
   {name:'Raccourcis maîtrisés',icon:'⚡',steps:Array.from({length:5},(_,i)=>i+shortcutStart),skill:'Ctrl+A, Ctrl+C, Ctrl+X, Ctrl+V, Ctrl+Z et Ctrl+S'}
 ]}
 function recordProgress(){
-  const before=badgeDefinitions().filter(b=>b.steps.every(i=>progressRecords[i])).map(b=>b.name);
+  const before=badgeDefinitions().filter(b=>badgeEarned(b)).map(b=>b.name);
   const stats=lessonStats.get(step)||{help:0,attempts:0};
   progressRecords[step]={title:missions[step][0],date:new Date().toISOString(),help:stats.help,attempts:stats.attempts};
   try{window.localStorage.setItem(profileProgressKey(),JSON.stringify(progressRecords))}catch{progressAvailable=false}
-  saveActiveProfile();renderBadges();return badgeDefinitions().filter(b=>!before.includes(b.name)&&b.steps.every(i=>progressRecords[i])).map(b=>b.name);
+  const awards=badgeDefinitions().filter(b=>!before.includes(b.name)&&b.steps.every(i=>progressRecords[i])).map(b=>b.name);
+  if(activeProfile)activeProfile.earnedBadges=[...new Set([...(activeProfile.earnedBadges||[]),...awards])];
+  saveActiveProfile();renderBadges();return awards;
 }
+function badgeEarned(b){return b.steps.every(i=>progressRecords[i])||activeProfile?.earnedBadges?.includes(b.name)}
 let reportPage=0;
 function renderBadges(allRows=false){
   $('badgeGrid').replaceChildren();
-  badgeDefinitions().forEach(b=>{const count=b.steps.filter(i=>progressRecords[i]).length,earned=count===b.steps.length;
+  badgeDefinitions().forEach(b=>{const count=b.steps.filter(i=>progressRecords[i]).length,earned=badgeEarned(b);
     const card=document.createElement('article');card.className='badge-card '+(earned?'earned':'');
     const icon=document.createElement('span');icon.className='badge-icon';icon.textContent=b.icon;
     const title=document.createElement('h3');title.textContent=b.name;
     const description=document.createElement('p');description.textContent=b.skill;
-    const status=document.createElement('strong');status.textContent=earned?'✓ Badge obtenu':count+' / '+b.steps.length+' missions réussies';card.append(icon,title,description,status);$('badgeGrid').append(card);
+    const status=document.createElement('strong');status.textContent=earned?'✓ Badge obtenu':count+' / '+b.steps.length+' missions réussies';const replay=document.createElement('button');replay.type='button';replay.textContent=earned?'Refaire ce badge':'Travailler ce badge';replay.onclick=()=>replayMission(b.steps[0]);card.append(icon,title,description,status,replay);$('badgeGrid').append(card);
   });
   $('progressStorage').textContent=progressAvailable?'Les réussites et badges de '+(activeProfile?.name||'ce carnet')+' sont conservés pour ce profil, dans ce navigateur.':'La sauvegarde locale est indisponible. Le carnet reste consultable pendant cette session.';
   const table=document.createElement('table'),head=document.createElement('tr');
@@ -59,7 +62,7 @@ function renderBadges(allRows=false){
 }
 function initializeAdvanced(){
   const basics=missions.splice(0);mouseStart=0;mouseExercises.forEach(e=>missions.push(e.slice(0,3)));
-  basicStart=missions.length;missions.push(...basics);
+  basicStart=missions.length;missions.push(...basics.slice(0,2),...navigationExercises,...basics.slice(2));
   pathStart=missions.length;pathExercises.forEach(e=>missions.push(e.slice(0,3)));
   windowStart=missions.length;windowExercises.forEach(e=>missions.push(e));
   fileClipboardStart=missions.length;fileClipboardExercises.forEach(e=>missions.push(e));

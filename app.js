@@ -38,30 +38,30 @@ function pasteClipboard(){
   }
   const clone=(snapshot,parent)=>{const id='copy-'+ ++serial;entries.push({id,name:uniqueName(snapshot.name,parent),type:snapshot.type,parent,copiedFrom:snapshot.sourceId,content:snapshot.content});snapshot.children.forEach(child=>clone(child,id));return id};
   clone(clipboard,currentFolder);renderFiles();tell('La copie est créée. L’original reste à sa place.');
-  if(step===basicStart+5&&clipboard.sourceId==='photo'&&currentFolder==='root')success();checkChallenge(false);checkFileClipboardMission('copy-paste',clipboard.sourceId);
+  if(step===basicStep(5)&&clipboard.sourceId==='photo'&&currentFolder==='root')success();checkChallenge(false);checkFileClipboardMission('copy-paste',clipboard.sourceId);
 }
 function deleteSelected(){
   const e=entries.find(e=>e.id===selected);if(!e||isTrashed(e.id)){tell('Sélectionne un élément à supprimer.');return}
   e.originalParent=e.parent;e.parent='trash';selected=null;renderFiles();tell('Élément placé dans la corbeille. Tu peux le restaurer.');
-  if(step===basicStart+8&&e.id==='note')success();
+  if(step===basicStep(8)&&e.id==='note')success();
 }
 function restoreSelected(){
   const e=entries.find(e=>e.id===selected);if(!e||e.parent!=='trash'){tell('Sélectionne un élément dans la corbeille.');return}
   const original=entries.find(x=>x.id===e.originalParent);
   e.parent=e.originalParent==='root'||original&&!isTrashed(original.id)?e.originalParent:'root';
   e.name=uniqueName(e.name,e.parent,e.id);delete e.originalParent;selected=null;renderFiles();tell('Élément restauré dans '+folderPath(e.parent)+'.');
-  if(step===basicStart+9&&e.id==='note')success();
+  if(step===basicStep(9)&&e.id==='note')success();
 }
-function tell(message){$('feedback').textContent=message}
-function success(){if(completed)return;completed=true;passedSteps.add(step);const awards=recordProgress();tell('✓ Bravo ! Tu as réussi cette mission.'+(awards.length?' 🏅 Nouveau badge : '+awards.join(', '):''));$('next').hidden=false;$('next').textContent=step===missions.length-1?'Terminer mon parcours ✨':'Mission suivante →';renderSteps()}
+function tell(message){$('feedback').textContent=completed?missionSuccessMessage():message;$('feedback').classList.toggle('mission-won',completed)}
+function success(){if(completed)return;completed=true;passedSteps.add(step);const awards=recordProgress();tell('✓ Bravo ! Tu as réussi cette mission.'+(awards.length?' 🏅 Nouveau badge : '+awards.join(', '):''));$('next').hidden=false;$('next').textContent=step===missions.length-1?'Terminer mon parcours ✨':'Mission suivante →';renderSteps();renderBadgeJourney();if(awards.length)celebrateBadge(awards[0])}
 let stepsPage=0;
 function renderSteps(followCurrent=true){
  const container=$('steps');container.replaceChildren();if(followCurrent)stepsPage=Math.floor(step/5);
- const start=stepsPage*5;missions.slice(start,start+5).forEach((m,index)=>{const i=start+index,d=document.createElement('div');d.className='step '+(i===step?'active':passedSteps.has(i)?'done':'');const n=document.createElement('span');n.className='number';n.textContent=passedSteps.has(i)?'✓':i+1;d.append(n,document.createTextNode(m[0]));container.append(d)});
+ const start=stepsPage*5;missions.slice(start,start+5).forEach((m,index)=>{const i=start+index,d=document.createElement('button');d.type='button';d.onclick=()=>replayMission(i);d.setAttribute('aria-label',(progressRecords[i]?'Refaire : ':'Travailler : ')+m[0]);d.className='step '+(i===step?'active':progressRecords[i]?'done':'');const n=document.createElement('span');n.className='number';n.textContent=progressRecords[i]?'✓':i+1;d.append(n,document.createTextNode(m[0]));container.append(d)});
  $('previousSteps').disabled=stepsPage===0;$('followingSteps').disabled=start+5>=missions.length;
 }
-function mission(){stopSpeech();closeContextMenu();completed=false;$('next').hidden=true;$('hint').hidden=true;$('missionNumber').textContent=`MISSION ${step+1} / ${missions.length}`;$('title').textContent=missions[step][0];$('instruction').textContent=missions[step][1];renderSteps();renderAdvancedExercise()}
-function openFolder(id){closeContextMenu();currentFolder=id;selected=null;showSimWindow('files');renderFiles();if(step===basicStart+1&&id==='root')success();checkChallenge(false)}
+function mission(){stopSpeech();closeContextMenu();completed=false;$('next').hidden=true;$('hint').hidden=true;$('missionNumber').textContent=`MISSION ${step+1} / ${missions.length}`;$('title').textContent=missions[step][0];$('instruction').textContent=missions[step][1];renderSteps();renderAdvancedExercise();renderBadgeJourney()}
+function openFolder(id){const from=currentFolder;closeContextMenu();currentFolder=id;selected=null;showSimWindow('files');renderFiles();if(step===basicStart+1&&id==='root')success();checkNavigationMission(from,id);checkChallenge(false)}
 function fileExtension(entry){return entry.type==='folder'?'':entry.name.match(/\.(txt|tad|docx|png|jpe?g|gif|pdf)$/i)?.[0]||''}
 function displayName(entry){const ext=fileExtension(entry);return ext?entry.name.slice(0,-ext.length):entry.name}
 function renderFiles(){const folderName=currentFolder==='trash'?'Corbeille':currentFolder==='root'?'Mes images':entries.find(e=>e.id===currentFolder)?.name||'Dossier';$('path').textContent=folderName;$('crumb').textContent=folderPath(currentFolder);$('status').textContent='Clique sur un élément pour le sélectionner.';$('restore').hidden=currentFolder!=='trash';for(const id of ['create','rename','move','copy','cut','paste','delete'])$(id).hidden=currentFolder==='trash';$('files').replaceChildren();entries.filter(e=>e.parent===currentFolder&&!isTrashed(e.id)||currentFolder==='trash'&&e.parent==='trash').forEach(e=>{const b=document.createElement('button');b.className='file'+(selected===e.id?' selected':'')+(clipboard?.mode==='cut'&&clipboard.sourceId===e.id?' cut-pending':'');b.draggable=currentFolder!=='trash';b.dataset.entryId=e.id;b.setAttribute('aria-label',`${e.type==='folder'?'Dossier':'Fichier'} ${displayName(e)}`);const icon=document.createElement('span');icon.textContent=e.type==='folder'?'📁':e.type==='image'?'🐈':'T';if(e.type==='text')icon.className='tada-file-icon';b.append(icon,document.createTextNode(displayName(e)));b.onclick=()=>{selected=e.id;Array.from($('files').children).forEach(child=>child.classList.remove('selected'));b.classList.add('selected');$('status').textContent=`${displayName(e)} sélectionné`};b.ondblclick=()=>openEntry(e.id);b.ondragstart=ev=>ev.dataTransfer.setData('text/plain',e.id);if(e.type==='folder'&&currentFolder!=='trash'){b.ondragover=ev=>ev.preventDefault();b.ondrop=ev=>{ev.preventDefault();moveFile(ev.dataTransfer.getData('text/plain'),e.id)}}$('files').append(b)});if(!$('files').children.length)$('files').textContent=currentFolder==='trash'?'La corbeille est vide.':'Ce dossier est vide. Tu peux y ranger des fichiers.';renderBreadcrumb()}
@@ -70,7 +70,7 @@ const e=entries.find(e=>e.id===id);
 if(!e||isTrashed(id)||!validDestination(e,dest)){tell('Choisis un dossier valide. Un dossier ne peut pas être rangé dans lui-même.');return false}
 if(entries.some(x=>x.id!==id&&x.parent===dest&&sameName(x.name,e.name))){tell('Ce nom existe déjà dans le dossier de destination.');return false}
 e.parent=dest;selected=null;renderFiles();tell('Le fichier ou dossier a été déplacé.');
-if(step===basicStart+4&&e.id==='photo'&&sameName(e.name,'Chat')&&dest==='animals'||step===basicStart+7&&e.id==='animals'&&dest==='archives')success();checkChallenge(false);return true;
+if(step===basicStep(4)&&e.id==='photo'&&sameName(e.name,'Chat')&&dest==='animals'||step===basicStep(7)&&e.id==='animals'&&dest==='archives')success();checkChallenge(false);return true;
 }
 function showDialog(kind){
 closeContextMenu();stopSpeech();
@@ -85,29 +85,31 @@ if(moving){const e=entries.find(e=>e.id===selected);$('destination').replaceChil
 $('dialog').showModal();if(!moving){$('name').focus();$('name').select()}else $('destination').focus();
 }
 $('images').onclick=()=>{$('images').classList.add('selected');if(step===basicStart+0)success()};$('images').ondblclick=()=>openFolder('root');$('close').onclick=()=>{closeContextMenu();$('window').hidden=true};$('back').onclick=()=>openFolder(entries.find(e=>e.id===currentFolder)?.parent||'root');$('create').onclick=()=>showDialog('create');$('rename').onclick=()=>showDialog('rename');$('move').onclick=()=>showDialog('move');$('cancel').onclick=()=> $('dialog').close();
-$('form').onsubmit=ev=>{ev.preventDefault();if(action==='move'){if(moveFile(selected,$('destination').value))$('dialog').close();else $('error').textContent='Choisis une autre destination.';return}let name=$('name').value.trim();if(!name){$('error').textContent='Écris un nom pour cet élément.';return}if(action==='rename'){const ext=fileExtension(entries.find(e=>e.id===selected));if(ext&&!name.toLowerCase().endsWith(ext.toLowerCase()))name+=ext}if(!name||/[\\/:*?"<>|]/.test(name)){$('error').textContent='Choisis un nom sans caractères spéciaux comme / ou :.';return}if(entries.some(e=>e.parent===currentFolder&&sameName(e.name,name)&&(action==='create'||e.id!==selected))){$('error').textContent='Ce nom est déjà utilisé dans ce dossier.';return}if(action==='create'){if(sameName(name,'Animaux')&&entries.some(e=>e.id==='animals')){$('error').textContent='Le dossier Animaux existe déjà dans Mes images.';return}entries.push({id:sameName(name,'Animaux')?'animals':`folder-${++serial}`,name,type:'folder',parent:currentFolder});tell('Ton nouveau dossier est créé.');if(step===basicStart+2&&sameName(name,'Animaux')&&currentFolder==='root')success()}else{const e=entries.find(e=>e.id===selected);e.name=name;tell('Le nom a été changé.');if(step===basicStart+3&&e.id==='photo'&&sameName(name,'Chat')||step===basicStart+6&&e.id==='animals'&&sameName(name,'Mes animaux'))success()}$('dialog').close();renderFiles();checkChallenge(false)};
+$('form').onsubmit=ev=>{ev.preventDefault();if(action==='move'){if(moveFile(selected,$('destination').value))$('dialog').close();else $('error').textContent='Choisis une autre destination.';return}let name=$('name').value.trim();if(!name){$('error').textContent='Écris un nom pour cet élément.';return}if(action==='rename'){const ext=fileExtension(entries.find(e=>e.id===selected));if(ext&&!name.toLowerCase().endsWith(ext.toLowerCase()))name+=ext}if(!name||/[\\/:*?"<>|]/.test(name)){$('error').textContent='Choisis un nom sans caractères spéciaux comme / ou :.';return}if(entries.some(e=>e.parent===currentFolder&&sameName(e.name,name)&&(action==='create'||e.id!==selected))){$('error').textContent='Ce nom est déjà utilisé dans ce dossier.';return}if(action==='create'){if(sameName(name,'Animaux')&&entries.some(e=>e.id==='animals')){$('error').textContent='Le dossier Animaux existe déjà dans Mes images.';return}entries.push({id:sameName(name,'Animaux')?'animals':`folder-${++serial}`,name,type:'folder',parent:currentFolder});tell('Ton nouveau dossier est créé.');if(step===basicStep(2)&&sameName(name,'Animaux')&&currentFolder==='root')success()}else{const e=entries.find(e=>e.id===selected);e.name=name;tell('Le nom a été changé.');if(step===basicStep(3)&&e.id==='photo'&&sameName(name,'Chat')||step===basicStep(6)&&e.id==='animals'&&sameName(name,'Mes animaux'))success()}$('dialog').close();renderFiles();checkChallenge(false)};
 $('help').onclick=()=>{if($('hint').hidden)noteHelp();stopSpeech();$('hintText').textContent=missions[step][2];$('hint').hidden=!$('hint').hidden};
 $('next').onclick=()=>{
 stopSpeech();if(!completed)return;
 if(step===missions.length-1){$('title').textContent=passedSteps.size===missions.length?'Parcours terminé : bravo !':'Atelier terminé : bravo !';$('instruction').textContent='Consulte ton carnet pour voir les missions réussies, tes badges et les défis à poursuivre.';$('missionNumber').textContent='PARCOURS TERMINÉ';$('next').hidden=true;$('hint').hidden=true;tell('Bravo ! Retrouve les badges obtenus et tes missions réussies dans Mes badges.');return}
 step++;prepareMission();mission();tell('À toi de jouer !');
 };
-function prepareMission(){
+function prepareMission(fresh=false){
 if(prepareFileClipboardMission())return;
 if(prepareWindowMission())return;
-if(prepareDocumentMission())return;
+if(prepareDocumentMission(fresh))return;
 if(prepareAdvancedMission())return;
+if(prepareNavigationMission())return;
+if((fresh||step===basicStep(2))&&step>=basicStart&&step<=basicStep(9))seedBasicMission();
 if(step===basicStart){entries=[{id:"photo",name:"Photo 1",type:"image",parent:"root"},{id:"note",name:"Mon petit mémo",type:"text",parent:"root"}];selected=null;currentFolder="root";clipboard=null;hideSimWindow("files");return}
 
 if(step===basicStart+1){hideSimWindow('files');return}
-if(step===basicStart+2)entries=entries.filter(e=>e.id!=='animals');
-if(step===basicStart+3)entries.find(e=>e.id==='photo').name='Photo 1';
-if(step===basicStart+4)entries.find(e=>e.id==='photo').parent='root';
-if(step===basicStart+5){const photo=entries.find(e=>e.id==='photo');if(!sameName(photo.name,'Chat'))photo.name='Chat';photo.parent='animals'}
-if(step===basicStart+6){const folder=entries.find(e=>e.id==='animals');if(!sameName(folder.name,'Animaux'))folder.name='Animaux'}
-if(step===basicStart+7){const folder=entries.find(e=>e.id==='animals');if(!sameName(folder.name,'Mes animaux'))folder.name='Mes animaux';if(!entries.some(e=>e.id==='archives'))entries.push({id:'archives',name:'Archives',type:'folder',parent:'root'})}
-if(step===basicStart+8){const note=entries.find(e=>e.id==='note');note.name='Mon petit mémo';note.parent='root';delete note.originalParent}
-openFolder(step===basicStart+5?'animals':'root');
+if(step===basicStep(2))entries=entries.filter(e=>e.id!=='animals');
+if(step===basicStep(3))entries.find(e=>e.id==='photo').name='Photo 1';
+if(step===basicStep(4))entries.find(e=>e.id==='photo').parent='root';
+if(step===basicStep(5)){const photo=entries.find(e=>e.id==='photo');if(!sameName(photo.name,'Chat'))photo.name='Chat';photo.parent='animals'}
+if(step===basicStep(6)){const folder=entries.find(e=>e.id==='animals');if(!sameName(folder.name,'Animaux'))folder.name='Animaux'}
+if(step===basicStep(7)){const folder=entries.find(e=>e.id==='animals');if(!sameName(folder.name,'Mes animaux'))folder.name='Mes animaux';if(!entries.some(e=>e.id==='archives'))entries.push({id:'archives',name:'Archives',type:'folder',parent:'root'})}
+if(step===basicStep(8)){const note=entries.find(e=>e.id==='note');note.name='Mon petit mémo';note.parent='root';delete note.originalParent}
+openFolder(step===basicStep(5)?'animals':'root');
 }
 $('reset').onclick=()=>{if(!mayLeaveDocument())return;resetDocumentDraft();resetSimWindows();if($('docDialog').open)$('docDialog').close();if($('dialog').open)$('dialog').close();if($('filePreview').open)$('filePreview').close();stopSpeech();closeContextMenu();step=0;selected=null;currentFolder='root';clipboard=null;serial=0;passedSteps.clear();lessonStats.clear();entries=[{id:'photo',name:'Photo 1',type:'image',parent:'root'},{id:'note',name:'Mon petit mémo',type:'text',parent:'root'}];$('window').hidden=true;$('images').classList.remove('selected');$('trash').classList.remove('selected');mission();tell('Bienvenue ! Ta première mission t’attend.')};
 const contextMenu=document.createElement('div');
