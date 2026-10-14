@@ -55,10 +55,12 @@ function restoreSelected(){
 function tell(message){$('feedback').textContent=completed?missionSuccessMessage():message;$('feedback').classList.toggle('mission-won',completed)}
 function success(){if(completed)return;completed=true;passedSteps.add(step);const awards=recordProgress();tell('✓ Bravo ! Tu as réussi cette mission.'+(awards.length?' 🏅 Nouveau badge : '+awards.join(', '):''));$('next').hidden=false;$('next').textContent=step===missions.length-1?'Terminer mon parcours ✨':'Mission suivante →';renderSteps();renderBadgeJourney();if(awards.length)celebrateBadge(awards[0])}
 let stepsPage=0;
+function visibleBadgeSteps(){return currentBadge()?.steps||[]}
 function renderSteps(followCurrent=true){
- const container=$('steps');container.replaceChildren();if(followCurrent)stepsPage=Math.floor(step/5);
- const start=stepsPage*5;missions.slice(start,start+5).forEach((m,index)=>{const i=start+index,d=document.createElement('button');d.type='button';d.onclick=()=>replayMission(i);d.setAttribute('aria-label',(progressRecords[i]?'Refaire : ':'Travailler : ')+m[0]);d.className='step '+(i===step?'active':progressRecords[i]?'done':'');const n=document.createElement('span');n.className='number';n.textContent=progressRecords[i]?'✓':i+1;d.append(n,document.createTextNode(m[0]));container.append(d)});
- $('previousSteps').disabled=stepsPage===0;$('followingSteps').disabled=start+5>=missions.length;
+ const indices=visibleBadgeSteps(),container=$('steps');container.replaceChildren();if(followCurrent)stepsPage=Math.floor(Math.max(0,indices.indexOf(step))/5);
+ stepsPage=Math.min(stepsPage,Math.max(0,Math.ceil(indices.length/5)-1));
+ const start=stepsPage*5;indices.slice(start,start+5).forEach((i,index)=>{const m=missions[i],d=document.createElement('button');d.type='button';d.onclick=()=>replayMission(i);d.setAttribute('aria-label',(progressRecords[i]?'Refaire : ':'Travailler : ')+m[0]);d.className='step '+(i===step?'active':progressRecords[i]?'done':'');const n=document.createElement('span');n.className='number';n.textContent=progressRecords[i]?'✓':start+index+1;d.append(n,document.createTextNode(m[0]));container.append(d)});
+ $('previousSteps').disabled=stepsPage===0;$('followingSteps').disabled=start+5>=indices.length;renderModuleBadges();
 }
 function mission(){stopSpeech();closeContextMenu();completed=false;$('next').hidden=true;$('hint').hidden=true;$('missionNumber').textContent=`MISSION ${step+1} / ${missions.length}`;$('title').textContent=missions[step][0];$('instruction').textContent=missions[step][1];renderSteps();renderAdvancedExercise();renderBadgeJourney()}
 function openFolder(id){const from=currentFolder;closeContextMenu();currentFolder=id;selected=null;showSimWindow('files');renderFiles();if(step===basicStart+1&&id==='root')success();checkNavigationMission(from,id);checkChallenge(false)}

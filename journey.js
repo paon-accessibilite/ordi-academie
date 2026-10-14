@@ -35,6 +35,13 @@ function replayMission(index){
  prepareMission(true);mission();$('badgePanel').hidden=true;tell('À toi de jouer ! Tes réussites restent dans ton carnet.');saveActiveProfile();
 }
 function currentBadge(){return badgeDefinitions().find(b=>b.steps.includes(step))}
+const badgeModules=['startBasics','startOrganizer','startPaths','startMouse','startWindows','startFileClipboard','startDocuments','startWriting','startClipboard','startShortcuts'];
+function renderModuleBadges(){badgeDefinitions().forEach((badge,i)=>{
+ const button=$(badgeModules[i]);if(!button)return;
+ button.classList.toggle('badge-complete',!!badgeEarned(badge));
+ button.setAttribute('aria-label',badge.name+(badgeEarned(badge)?' — badge obtenu':''));
+ button.setAttribute('aria-current',badge.steps.includes(step)?'step':'false');
+})}
 function renderBadgeJourney(){
  const badge=currentBadge();if(!badge)return;
  const panel=$('badgeJourney');

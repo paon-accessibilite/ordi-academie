@@ -57,9 +57,14 @@ for(let n=0;n<6;n++)mouseTarget().onclick({detail:1,timeStamp:n+10});if(!complet
 $('next').onclick();for(let n=0;n<6;n++)mouseTarget().oncontextmenu({button:2,preventDefault(){}});if(!completed)throw Error('clic droit');
 $('next').onclick();$('doubleDelay').value='1500';mouseTarget().onclick({detail:1,timeStamp:100});if(mouseHits)throw Error('simple clic compté double');mouseTarget().onclick({detail:2,timeStamp:1300});
 for(let n=1;n<5;n++){mouseTarget().onclick({detail:1,timeStamp:2000*n});mouseTarget().onclick({detail:2,timeStamp:2000*n+100})}if(!completed)throw Error('double-clic souple');
-$('next').onclick();const transfer={value:'',setData(type,value){this.value=value},getData(){return this.value}};
-$('mouseArena').children[0].ondrop({preventDefault(){},dataTransfer:transfer});if(mouseHits)throw Error('drop sans geste accepté');
-for(let n=0;n<4;n++){const target=mouseTarget();target.ondragstart({dataTransfer:transfer});$('mouseArena').children[0].ondrop({preventDefault(){},dataTransfer:transfer});target.ondragend()}if(!completed)throw Error('glisser-déposer souris');
+$('next').onclick();
+const pointerEvent=(x,y,id=1,button=0)=>({clientX:x,clientY:y,pointerId:id,button,preventDefault(){}});
+const dragTarget=()=>{const target=mouseTarget(),home=$('mouseArena').children[0];$('mouseArena').getBoundingClientRect=()=>({left:0,top:0,width:800,height:300});target.getBoundingClientRect=()=>({left:80,top:40,width:90,height:90});home.getBoundingClientRect=()=>({left:600,right:750,top:100,bottom:200});target.setPointerCapture=id=>target.captured=id;target.releasePointerCapture=id=>{if(target.captured!==id)throw Error('capture perdue')};return target};
+let dragged=dragTarget();dragged.onpointerup(pointerEvent(650,150));if(mouseHits)throw Error('lâcher sans maintien accepté');
+dragged.onpointerdown(pointerEvent(125,85,1,2));if(mouseDragging)throw Error('clic droit démarre glissement');
+dragged.onpointerdown(pointerEvent(125,85));dragged.onpointermove(pointerEvent(650,150));if(dragged.style.left!=='650px'||!mouseDragging)throw Error('image immobile pendant glissement');dragged.onpointerup(pointerEvent(400,150));if(mouseHits||mouseDragging||mouseWrong!==1)throw Error('dépôt extérieur');
+dragged=dragTarget();dragged.onpointerdown(pointerEvent(125,85));dragged.onpointercancel(pointerEvent(650,150));if(mouseHits||mouseDragging)throw Error('annulation valide un geste');
+for(let n=0;n<4;n++){const target=dragTarget();target.onpointerdown(pointerEvent(125,85));target.onpointermove(pointerEvent(650,150));target.onpointerup(pointerEvent(650,150))}if(!completed)throw Error('glisser-déposer souris');
 $('next').onclick();if(step!==basicStart||!$('window').hidden||!entries.some(e=>e.id==='photo'))throw Error('souris vers premiers fichiers');
 step=windowStart;prepareMission();mission();
 $('minimizeFiles').onclick();if(!completed||!$('window').hidden||$('taskFiles').hidden)throw Error('réduction');
@@ -217,6 +222,8 @@ window.confirm=()=>true;
 const earnedBefore=Object.keys(progressRecords).length;
 for(let i=0;i<missions.length;i++){
  documentDraft.dirty=false;replayMission(i);if(completed||step!==i)throw Error('reprise mission '+i);
+ const badge=currentBadge();if(visibleBadgeSteps().some(id=>!badge.steps.includes(id)))throw Error('missions étrangères au badge');
+ for(const button of $('steps').children){if(!badge.steps.some(id=>button['aria-label'].endsWith(missions[id][0])))throw Error('liste mélange les badges')}
  for(const e of entries.filter(e=>e.type==='folder'))folderPath(e.id);
 }
 if(Object.keys(progressRecords).length!==earnedBefore)throw Error('reprise efface les acquis');
@@ -228,6 +235,8 @@ replayMission(documentStart+3);closeEditor();openTextDocument('invitation-docume
 celebrateBadge('Premier bureau');if(!$('badgeCelebration').open||!$('celebrationSkills').textContent.includes('racine'))throw Error('écran félicitations');$('collectBadge').onclick();if($('badgeCelebration').open)throw Error('badge non collecté');
 const old={id:'old-v1',name:'Ancien élève',avatar:'🦊',records:{a:{title:missions[basicStart][0],date:new Date().toISOString(),help:0,attempts:0},b:{title:missions[basicStart+1][0],date:new Date().toISOString(),help:0,attempts:0}}};
 studentProfiles.push(old);documentDraft.dirty=false;connectProfile(old.id);if(!badgeEarned(badgeDefinitions()[0])||progressRecords[basicStart+2]||old.journeyVersion!==2)throw Error('ancien badge perdu ou nouvelles missions déjà validées');
+if(!$('startBasics')['aria-label'].includes('badge obtenu')||$('startOrganizer')['aria-label'].includes('badge obtenu'))throw Error('sections vertes confondent les badges');
+replayMission(basicStep(2));$('followingSteps').onclick();if($('steps').children.length!==3||visibleBadgeSteps().length!==8)throw Error('pagination du badge Organisateur');
 `,replayContext);
 console.log('Reprise des 49 missions, documents autonomes, félicitations et anciens badges : OK');
 

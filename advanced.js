@@ -45,6 +45,7 @@ function recordProgress(){
 function badgeEarned(b){return b.steps.every(i=>progressRecords[i])||activeProfile?.earnedBadges?.includes(b.name)}
 let reportPage=0;
 function renderBadges(allRows=false){
+  renderModuleBadges();
   $('badgeGrid').replaceChildren();
   badgeDefinitions().forEach(b=>{const count=b.steps.filter(i=>progressRecords[i]).length,earned=badgeEarned(b);
     const card=document.createElement('article');card.className='badge-card '+(earned?'earned':'');
@@ -78,7 +79,7 @@ function initializeAdvanced(){
   }catch{progressAvailable=false}
   $('startBasics').onclick=()=>{$('reset').onclick();if(documentDraft.dirty)return;step=basicStart;prepareMission();mission();$('badgePanel').hidden=true};
   const start=index=>{if(!mayLeaveDocument())return;resetDocumentDraft();resetSimWindows();if($('docDialog').open)$('docDialog').close();stopSpeech();closeContextMenu();if($('dialog').open)$('dialog').close();if($('filePreview').open)$('filePreview').close();step=index;prepareMission();mission();tell('À toi de jouer !');$('badgePanel').hidden=true};
-  $('startPaths').onclick=()=>start(pathStart);$('startMouse').onclick=()=>start(mouseStart);
+  $('startPaths').onclick=()=>start(pathStart);$('startMouse').onclick=()=>start(mouseStart);$('startOrganizer').onclick=()=>replayMission(basicStep(2));
   $('showBadges').onclick=()=>{renderBadges();$('badgePanel').hidden=!$('badgePanel').hidden;if(!$('badgePanel').hidden)$('badgePanel').scrollIntoView?.({behavior:'smooth',block:'start'})};
   $('teacherDetails').ontoggle=()=>{$('badgePanel').classList.toggle('teacher-view',$('teacherDetails').open)};$('previousReport').onclick=()=>{reportPage=Math.max(0,reportPage-1);renderBadges()};$('followingReport').onclick=()=>{reportPage=Math.min(Math.ceil(missions.length/8)-1,reportPage+1);renderBadges()};
   $('closeBadges').onclick=()=>{$('badgePanel').hidden=true};$('printBadges').onclick=()=>{$('teacherDetails').open=true;renderBadges(true);window.print();renderBadges()};
@@ -164,11 +165,32 @@ function renderMouseTarget(){
   };
   target.oncontextmenu=ev=>{ev.preventDefault();if(ev.button!==2){tell('Utilise le bouton droit de la souris sur cette cible.');return}if(exercise[3]==='right')mouseGesture(true);else mouseGesture(false)};
   if(exercise[3]==='drag'){
-    target.draggable=true;target.ondragstart=ev=>{mouseDragging=true;ev.dataTransfer.setData('text/plain','academy-mouse');ev.dataTransfer.effectAllowed='move'};target.ondragend=()=>{if(mouseDragging)mouseGesture(false);mouseDragging=false};
-    const home=document.createElement('div');home.className='mouse-home';home.textContent='🏠 Maison';home.ondragover=ev=>ev.preventDefault();home.ondrop=ev=>{ev.preventDefault();if(mouseDragging&&ev.dataTransfer.getData('text/plain')==='academy-mouse'){mouseDragging=false;mouseGesture(true)}};arena.append(home);
+    target.draggable=false;target.ondragstart=ev=>ev.preventDefault();
+    const home=document.createElement('div');home.className='mouse-home';home.textContent='🏠 Maison';arena.append(home);
+    let pointer=null,origin=null;
+    target.onpointerdown=ev=>{
+      if(ev.button!==0||pointer!==null)return;ev.preventDefault();
+      const bounds=target.getBoundingClientRect(),area=arena.getBoundingClientRect();
+      pointer=ev.pointerId;origin={x:ev.clientX,y:ev.clientY,left:bounds.left+bounds.width/2-area.left,top:bounds.top+bounds.height/2-area.top};
+      mouseDragging=true;target.classList.add('dragging');target.setPointerCapture(pointer);
+    };
+    target.onpointermove=ev=>{
+      if(ev.pointerId!==pointer)return;ev.preventDefault();const area=arena.getBoundingClientRect();
+      const radius=target.offsetWidth/2;
+      target.style.left=Math.max(radius,Math.min(area.width-radius,origin.left+ev.clientX-origin.x))+'px';
+      target.style.top=Math.max(radius,Math.min(area.height-radius,origin.top+ev.clientY-origin.y))+'px';
+    };
+    target.onpointerup=ev=>{
+      if(ev.pointerId!==pointer)return;ev.preventDefault();const bounds=home.getBoundingClientRect();
+      const correct=ev.clientX>=bounds.left&&ev.clientX<=bounds.right&&ev.clientY>=bounds.top&&ev.clientY<=bounds.bottom;
+      pointer=null;mouseDragging=false;target.classList.remove('dragging');target.releasePointerCapture(ev.pointerId);mouseGesture(correct);
+      if(!correct)renderMouseTarget();
+    };
+    const cancel=ev=>{if(ev.pointerId!==pointer)return;pointer=null;mouseDragging=false;renderMouseTarget()};
+    target.onpointercancel=cancel;target.onlostpointercapture=cancel;
   }
   arena.append(target);arena.oncontextmenu=ev=>ev.preventDefault();
-  arena.onclick=ev=>{if(ev.target===arena&&!completed)mouseGesture(false)};
+  arena.onclick=ev=>{if(ev.target===arena&&!completed&&exercise[3]!=='drag')mouseGesture(false)};
 }
 function mouseGesture(correct){
   if(completed||!isMouseMission())return;

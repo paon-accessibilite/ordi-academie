@@ -12,6 +12,9 @@
 .badge-card button{width:100%;font-size:12px;margin-top:8px;padding:6px}
 @media(min-width:1000px) and (min-height:600px){#sessionShell .workspace{min-height:0}.badge-journey{font-size:13px;padding:6px 10px}#sessionShell .mission h2{font-size:21px}#sessionShell .mission{flex:none}#sessionShell #instruction{font-size:17px}.badge-panel{overflow:auto!important}}
 @media print{.badge-journey,.badge-card button,#badgeCelebration,.flying-badge{display:none!important}}
+.module-nav button.badge-complete{background:#dff2df;border-color:#56916b;color:#164b2b;font-weight:700}
+.module-nav button[aria-current="step"]{box-shadow:inset 4px 0 #315e89}
+.mouse-target.drag{touch-action:none;-webkit-user-drag:none}.mouse-target.drag.dragging{cursor:grabbing}
 @media(min-width:1000px) and (min-height:600px){
  #sessionShell .workspace{grid-template-rows:140px minmax(0,1fr)}
  #sessionShell .lesson-panel{padding:6px 10px;gap:4px}
