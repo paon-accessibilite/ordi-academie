@@ -13,7 +13,7 @@ const windowExercises=[
 let basicStart=0,windowStart=0,activeSimWindow=null,windowLayer=1,windowEnlarged=false;
 const simWindows={files:{panel:'window',task:'taskFiles',max:false,open:false},editor:{panel:'editorPanel',task:'taskEditor',max:false,open:false}};
 function isWindowMission(){return step>=windowStart&&step<windowStart+windowExercises.length}
-function focusSimWindow(kind){activeSimWindow=kind;$(simWindows[kind].panel).style.zIndex=String(++windowLayer)}
+function focusSimWindow(kind){activeSimWindow=kind;windowLayer=3;for(const name of ['files','editor'])$(simWindows[name].panel).style.zIndex=name===kind?'3':'2'}
 function syncSimWindow(kind){const state=simWindows[kind],panel=$(state.panel);$(state.task).hidden=!state.open;panel.classList.toggle('maximized',state.max);const r=!state.max&&state.rect;Object.assign(panel.style,{left:r?r.x+'px':'',top:r?r.y+'px':'',width:r?r.w+'px':'',height:r?r.h+'px':'',right:r?'auto':'',bottom:r?'auto':''});const button=$(kind==='files'?'maximizeFiles':'maximizeEditor');button.textContent=state.max||state.snap?'❐':'□';button.setAttribute('aria-label',state.max||state.snap?'Restaurer la taille de la fenêtre':'Agrandir la fenêtre');button.title=state.max||state.snap?'Restaurer la taille':'Agrandir'}
 function showSimWindow(kind){const state=simWindows[kind];state.open=true;$(state.panel).hidden=false;focusSimWindow(kind);syncSimWindow(kind)}
 function hideSimWindow(kind){const state=simWindows[kind];state.open=false;state.max=false;state.snap=null;state.rect=null;state.restoreRect=null;$(state.panel).hidden=true;syncSimWindow(kind);if(activeSimWindow===kind)activeSimWindow=null}

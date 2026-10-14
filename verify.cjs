@@ -20,6 +20,8 @@ $('next').onclick();$('back').onclick();if(!completed||currentFolder!=='nav-anim
 $('next').onclick();openFolder('root');if(!completed)throw Error('retour racine');
 $('next').onclick();
 const rightClick=(target)=>({target,clientX:1000,clientY:750,preventDefault(){this.prevented=true},stopPropagation(){}});
+for(let i=0;i<100;i++)focusSimWindow(i%2?'files':'editor');
+if(Number($('window').style.zIndex)>=20||Number($('editorPanel').style.zIndex)>=20)throw Error('fenêtres masquent les menus après plusieurs actions');
 const blank=rightClick({closest(){return null},focus(){}}); $('files').oncontextmenu(blank);
 contextMenu.contains=()=>false;
 closeFileContextOutside({...blank,button:2});if(contextMenu.hidden)throw Error('clic droit referme le menu');

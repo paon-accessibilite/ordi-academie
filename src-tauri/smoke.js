@@ -43,6 +43,8 @@
     if(!native)target.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,button:2,clientX:rect.left+10,clientY:rect.top+10}));
     await new Promise(resolve=>setTimeout(resolve,150));
     assert(!contextMenu.hidden,'Clic droit : menu visible après le relâchement');
+    const item=contextMenu.children[0],hit=item.getBoundingClientRect();
+    assert(contextMenu.contains(document.elementFromPoint(hit.left+hit.width/2,hit.top+hit.height/2)),'Menu au-dessus de la fenêtre et accessible au clic');
     return native;
   };
   // Un espace vide de la grille, en dehors des icônes.
