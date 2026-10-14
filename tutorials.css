@@ -5,3 +5,5 @@
 .file-drag-ghost .drag-count{display:block;font-size:11px;background:#285e49;color:white;border-radius:5px;padding:3px;white-space:nowrap}
 
 .badge-film-actions{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:5px}.badge-journey .badge-film-actions button{grid-column:auto;min-width:0;padding:4px;font-size:11px;white-space:nowrap}
+
+.tutorial-panel #tutorialClose{background:#285e49;color:#fff;border-color:#285e49;font-weight:700;flex-shrink:0;transform-origin:right center;transition:transform .18s ease,background-color .18s ease}.tutorial-panel #tutorialClose:hover{background:#204f3d}.tutorial-panel #tutorialClose.tutorial-ready{transform:scale(1.08)}@media(prefers-reduced-motion:reduce){.tutorial-panel #tutorialClose{transition:none}}
