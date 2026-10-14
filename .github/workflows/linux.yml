@@ -39,4 +39,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload v0.1.0 release/Ordi-Academie-0.1.0-linux-amd64.deb release/SHA256SUMS-linux.txt release/validation-linux.json
+          version=$(node -p "require('./package.json').version")
+          gh release upload "v$version" "release/Ordi-Academie-$version-linux-amd64.deb" release/SHA256SUMS-linux.txt release/validation-linux.json

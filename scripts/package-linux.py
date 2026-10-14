@@ -146,6 +146,7 @@ desktop = next((root / 'usr/share/applications').glob('*.desktop'))
 desktop.write_text(desktop.read_text().replace('Categories=', 'Categories=Education;'))
 release = Path('release')
 release.mkdir(exist_ok=True)
-output = release / 'Ordi-Academie-0.1.0-linux-amd64.deb'
+version = json.loads(Path('package.json').read_text())['version']
+output = release / f'Ordi-Academie-{version}-linux-amd64.deb'
 run('dpkg-deb', '--root-owner-group', '-Zxz', '-b', str(root), str(output))
 (release / 'SHA256SUMS-linux.txt').write_text(hashlib.sha256(output.read_bytes()).hexdigest() + '  ' + output.name + '\n')
