@@ -53,8 +53,17 @@ async fn desktop_smoke_right_click(state: tauri::State<'_, SmokeReport>, x: i32,
         tauri::async_runtime::spawn_blocking(move || {
             let output = std::process::Command::new("xdotool").args(["search", "--onlyvisible", "--pid", &pid]).output().map_err(|e| e.to_string())?;
             let ids = String::from_utf8_lossy(&output.stdout);
-            let id = ids.lines().next().ok_or("Fenêtre de test introuvable")?;
-            let result = std::process::Command::new("xdotool").args(["mousemove", "--window", id, &x.to_string(), &y.to_string(), "sleep", "0.1", "click", "3"]).status().map_err(|e| e.to_string())?;
+            // GTK crée aussi des fenêtres temporaires pour les dialogues et menus.
+            // Choisir la fenêtre principale, plutôt que le premier identifiant X11.
+            let mut windows = Vec::new();
+            for id in ids.lines() {
+                let geometry = std::process::Command::new("xdotool").args(["getwindowgeometry", "--shell", id]).output().map_err(|e| e.to_string())?;
+                let text = String::from_utf8_lossy(&geometry.stdout);
+                let size = |key: &str| text.lines().find_map(|line| line.strip_prefix(key)).and_then(|value| value.parse::<u64>().ok()).unwrap_or(0);
+                windows.push((size("WIDTH=") * size("HEIGHT="), id));
+            }
+            let id = windows.into_iter().max_by_key(|(area, _)| *area).map(|(_, id)| id).ok_or("Fenêtre de test introuvable")?;
+            let result = std::process::Command::new("xdotool").args(["windowfocus", "--sync", id, "mousemove", "--window", id, &x.to_string(), &y.to_string(), "sleep", "0.1", "click", "3"]).status().map_err(|e| e.to_string())?;
             if !result.success() { return Err("Clic X11 impossible".into()); }
             Ok(true)
         }).await.map_err(|e| e.to_string())?
