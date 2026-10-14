@@ -1,10 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 if [ "${1:-}" != '--user' ]; then
-  runuser -u eleve -- bash /test-linux.sh --user
-  cp /tmp/ordi-qa/report.json /result/validation-linux.json
+  if ! runuser -u eleve -- bash /test-linux.sh --user; then
+    cat /tmp/ordi-qa/report.json 2>/dev/null || true
+    exit 1
+  fi
   dpkg -r ordi-academie
   test ! -f /usr/bin/ordi-academie
+  python3 - <<'PY'
+import json
+r=json.load(open('/tmp/ordi-qa/report.json'))
+r['environment']={'distribution':'Ubuntu 24.04', 'desktop':'Xfce', 'network':'none'}
+r['packageChecks']=['Installation avec dpkg sans apt', 'Deux lancements sans réseau', 'Reprise des profils', 'Désinstallation']
+json.dump(r,open('/result/validation-linux.json','w'),ensure_ascii=False,indent=2)
+PY
   exit
 fi
 mkdir -p /tmp/ordi-qa
