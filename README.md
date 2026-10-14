@@ -1,6 +1,6 @@
 # Ordi Académie
 
-## Version 0.2.0 Windows — à valider
+## Version 0.2.0 Windows et Linux
 
 55 missions, avec quatre nouveaux exercices de navigation regroupés dans le
 badge **Premier bureau** : entrer dans Animaux, descendre dans Chats, remonter
@@ -18,7 +18,7 @@ de félicitations avec ses compétences ; **collecter** anime son icône vers
 Tests : parcours et migration dans `npm test`, reprise des 55 missions et
 géométrie des consignes/boutons dans le moteur Windows. En 1280 × 720, le bureau
 occupe environ 941 × 506 px (73,5 % de la largeur, 70,3 % de la hauteur).
-La version Linux et la publication de la v0.2 attendent la validation utilisateur.
+La version Linux embarque son moteur graphique et une voix française pour fonctionner hors ligne.
 
 Les sections de gauche deviennent vertes lorsque leur badge est obtenu.
 **Organisateur** dispose de sa propre entrée. La liste **Missions du badge**
@@ -27,7 +27,7 @@ ne présente que les missions du badge actif, par pages de cinq.
 gauche, avec capture du pointeur ; le relâchement dans la maison valide le geste.
 Un dépôt extérieur ou une interruption remet la cible à sa place.
 
-**Version Windows 0.1.0 disponible avec installeur.** [Télécharger](https://github.com/paon-accessibilite/ordi-academie/releases/tag/v0.1.0) · [Instructions Windows](INSTALLATION-WINDOWS.md)
+**Version Windows 0.2.0 disponible avec installeur.** [Télécharger](https://github.com/paon-accessibilite/ordi-academie/releases/tag/v0.2.0) · [Instructions Windows](INSTALLATION-WINDOWS.md)
 
 **Version Linux Mint 22.3 Xfce (amd64).** Paquet `.deb` avec moteur d'affichage et
 voix française hors ligne embarqués. [Instructions Linux](INSTALLATION-LINUX.md).
