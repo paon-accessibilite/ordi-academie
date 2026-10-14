@@ -43,10 +43,12 @@ fn main() {
 
 // Test Linux : vrai clic X11, réservé au processus lancé avec --smoke-test.
 #[tauri::command]
-async fn desktop_smoke_right_click(state: tauri::State<'_, SmokeReport>, x: i32, y: i32) -> Result<bool, String> {
+async fn desktop_smoke_right_click(state: tauri::State<'_, SmokeReport>, x: i32, y: i32, button: Option<u8>) -> Result<bool, String> {
     if state.0.is_none() { return Err("Le mode test est désactivé".into()); }
+    let button = button.unwrap_or(3);
+    if ![1,3].contains(&button) { return Err("Bouton de test invalide".into()); }
     #[cfg(not(target_os = "linux"))]
-    { let _ = (x, y); Ok(false) }
+    { let _ = (x, y, button); Ok(false) }
     #[cfg(target_os = "linux")]
     {
         let pid = std::process::id().to_string();
@@ -63,7 +65,7 @@ async fn desktop_smoke_right_click(state: tauri::State<'_, SmokeReport>, x: i32,
                 windows.push((size("WIDTH=") * size("HEIGHT="), id));
             }
             let id = windows.into_iter().max_by_key(|(area, _)| *area).map(|(_, id)| id).ok_or("Fenêtre de test introuvable")?;
-            let result = std::process::Command::new("xdotool").args(["windowfocus", "--sync", id, "mousemove", "--window", id, &x.to_string(), &y.to_string(), "sleep", "0.1", "click", "3"]).status().map_err(|e| e.to_string())?;
+            let result = std::process::Command::new("xdotool").args(["windowfocus", "--sync", id, "mousemove", "--window", id, &x.to_string(), &y.to_string(), "sleep", "0.1", "click", &button.to_string()]).status().map_err(|e| e.to_string())?;
             if !result.success() { return Err("Clic X11 impossible".into()); }
             Ok(true)
         }).await.map_err(|e| e.to_string())?

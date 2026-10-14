@@ -55,15 +55,21 @@
     assert(contextMenu.contains(document.elementFromPoint(hit.left+hit.width/2,hit.top+hit.height/2)),'Menu au-dessus de la fenêtre et accessible au clic');
     return native;
   };
+  const chooseMenuItem=async()=>{
+    const item=contextMenu.children[0],rect=item.getBoundingClientRect();
+    const native=await window.__TAURI__.core.invoke('desktop_smoke_right_click',{x:Math.round(rect.left+rect.width/2),y:Math.round(rect.top+rect.height/2),button:1});
+    if(!native)item.click();
+    await new Promise(resolve=>setTimeout(resolve,150));
+  };
   // Un espace vide de la grille, en dehors des icônes.
   const grid=$('files').getBoundingClientRect();
   const blankPoint={getBoundingClientRect(){return {left:grid.right-28,top:grid.bottom-28,width:4,height:4}},dispatchEvent:event=>$('files').dispatchEvent(event)};
   report.nativeRightClick=await rightClick(blankPoint);
   assert(contextMenu.children[0].textContent==='Nouveau dossier','Clic droit dans Organisateur : Nouveau dossier');
-  contextMenu.children[0].click();assert($('dialog').open,'Clic droit ouvre la création de dossier');$('dialog').close();
+  await chooseMenuItem();assert($('dialog').open,'Clic droit ouvre la création de dossier');$('dialog').close();
   replayMission(basicStep(3));await rightClick(document.querySelector('.file[data-entry-id="photo"]'));
   assert(selected==='photo'&&contextMenu.children[0].textContent==='Renommer','Clic droit sur le fichier : Renommer');
-  contextMenu.children[0].click();assert($('dialog').open,'Clic droit ouvre le renommage');$('dialog').close();
+  await chooseMenuItem();assert($('dialog').open,'Clic droit ouvre le renommage');$('dialog').close();
   documentDraft.dirty=false;replayMission(basicStep(2));showDialog('create');$('name').value='Animaux';$('form').onsubmit({preventDefault(){}});
   tell('Après la réussite');assert($('feedback').textContent.includes('Mission réussie'),'Réussite reste affichée');
   celebrateBadge('Premier bureau');assert($('badgeCelebration').open&&$('celebrationSkills').textContent.includes('sous-dossier'),'Félicitations avec compétences');
