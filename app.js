@@ -138,7 +138,7 @@ function openContextMenu(ev,id=null){
 $('files').oncontextmenu=ev=>{const file=ev.target.closest('.file');openContextMenu(ev,file?file.dataset.entryId:null)};
 // WebKitGTK peut ouvrir le menu dès la pression du bouton droit.
 // Le même geste ne doit pas déclencher sa fermeture globale.
-$('files').onpointerdown=ev=>{if(ev.button===2){const file=ev.target.closest('.file');openContextMenu(ev,file?file.dataset.entryId:null)}};
+$('files').onpointerup=ev=>{if(ev.button===2){const file=ev.target.closest('.file');openContextMenu(ev,file?file.dataset.entryId:null)}};
 function closeFileContextOutside(ev){if(ev.button!==2&&!contextMenu.contains(ev.target))closeContextMenu()}
 document.addEventListener('pointerdown',closeFileContextOutside);
 document.addEventListener('scroll',()=>closeContextMenu(),true);

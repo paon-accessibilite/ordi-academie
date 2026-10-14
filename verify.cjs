@@ -25,7 +25,7 @@ if(Number($('window').style.zIndex)>=20||Number($('editorPanel').style.zIndex)>=
 const blank=rightClick({closest(){return null},focus(){}}); $('files').oncontextmenu(blank);
 contextMenu.contains=()=>false;
 closeFileContextOutside({...blank,button:2});if(contextMenu.hidden)throw Error('clic droit referme le menu');
-closeContextMenu();$('files').onpointerdown({...blank,button:2});if(contextMenu.hidden)throw Error('pression droite sans contextmenu');
+closeContextMenu();$('files').onpointerup({...blank,button:2});if(contextMenu.hidden)throw Error('relâchement droit sans contextmenu');
 closeFileContextOutside({...blank,button:0});if(!contextMenu.hidden)throw Error('clic gauche extérieur ne ferme pas');
 $('files').oncontextmenu(blank);
 if(!blank.prevented||contextMenu.hidden||contextMenu.children[0].textContent!=='Nouveau dossier')throw Error('menu espace vide');
