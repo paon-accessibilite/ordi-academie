@@ -59,7 +59,7 @@ function renderProfiles(){
  $('profilePages').hidden=studentProfiles.length<=4;$('previousProfiles').disabled=profilePage===0;$('followingProfiles').disabled=(profilePage+1)*4>=studentProfiles.length;$('profilePageInfo').textContent='Page '+(profilePage+1)+' / '+Math.max(1,Math.ceil(studentProfiles.length/4));
  $('connectProfile').disabled=!studentProfiles.some(p=>p.id===selectedProfileId);$('profileEmpty').hidden=studentProfiles.length>0;renderProfileStorage();
 }
-function profileSnapshot(){return {mission:missions[step][0],completed,entries:JSON.parse(JSON.stringify(entries)),currentFolder,selected,serial,clipboard:clipboard?JSON.parse(JSON.stringify(clipboard)):null,draft:{...documentDraft},documentClosed,textTools:{clipboard:textClipboard,evidence:[...textEvidence],history:textHistory.slice(-100),selection:textSelection()},windows:Object.fromEntries(Object.entries(simWindows).map(([kind,state])=>[kind,{open:state.open,max:state.max,rect:state.rect,snap:state.snap,restoreRect:state.restoreRect,minimized:$(state.panel).hidden}]))}}
+function profileSnapshot(){return {mission:missions[step][0],completed,entries:JSON.parse(JSON.stringify(entries)),currentFolder,selected,selectedIds:selectionIds(),serial,clipboard:clipboard?JSON.parse(JSON.stringify(clipboard)):null,draft:{...documentDraft},documentClosed,textTools:{clipboard:textClipboard,evidence:[...textEvidence],history:textHistory.slice(-100),selection:textSelection()},windows:Object.fromEntries(Object.entries(simWindows).map(([kind,state])=>[kind,{open:state.open,max:state.max,rect:state.rect,snap:state.snap,restoreRect:state.restoreRect,minimized:$(state.panel).hidden}]))}}
 function savedWindowRect(rect){return rect&&['x','y','w','h'].every(key=>Number.isFinite(rect[key])&&rect[key]>=0&&rect[key]<=10000)&&rect.w>0&&rect.h>0?{...rect}:null}
 function saveActiveProfile(){
  if(!activeProfile)return;activeProfile.records=validatedProgress(progressRecords);activeProfile.session=profileSnapshot();
@@ -76,7 +76,7 @@ function connectProfile(id){
  const profile=studentProfiles.find(p=>p.id===id);if(!profile)return;
  activeProfile=profile;resetDocumentDraft();$('reset').onclick();progressRecords=readProfileProgress(profile);progressAvailable=profilesAvailable;
  if(profile.journeyVersion!==2){
-   profile.earnedBadges=badgeDefinitions().filter(b=>b.name==='Premier bureau'?progressRecords[basicStart]&&progressRecords[basicStart+1]:(b.name==='Maître des fenêtres'?b.steps.slice(0,4):b.steps).every(i=>progressRecords[i])).map(b=>b.name);
+   profile.earnedBadges=badgeDefinitions().filter(b=>b.name==='Premier bureau'?progressRecords[basicStart]&&progressRecords[basicStart+1]:(['Maître des fenêtres','Souris agile'].includes(b.name)?b.steps.slice(0,4):b.name==='Organisateur'?b.steps.slice(0,8):b.steps).every(i=>progressRecords[i])).map(b=>b.name);
    profile.journeyVersion=2;writeProfiles();
  }
  lastOpenedEntry=null;documentClosed=false;pathChoice='';
@@ -93,11 +93,15 @@ function connectProfile(id){
    const visible=['editor','files'].find(kind=>simWindows[kind].open&&!$(simWindows[kind].panel).hidden);if(visible)focusSimWindow(visible);else activeSimWindow=null;
    if(session.completed&&progressRecords[step]){completed=true;$('next').hidden=false;$('next').textContent=step===missions.length-1?'Terminer mon parcours ✨':'Mission suivante →';if(isMouseMission())renderMouseTarget()}
  }
+ setFileSelection(Array.isArray(session?.selectedIds)?session.selectedIds.filter(id=>entries.some(e=>e.id===id&&e.parent===currentFolder)):selected?[selected]:[],false);
+ demoLastBadge=null;
  $('currentStudent').textContent=profile.avatar+' '+profile.name;$('badgeOwner').textContent='Carnet de '+profile.name;
  $('loginScreen').hidden=true;$('sessionShell').hidden=false;$('badgePanel').hidden=true;renderBadges();tell('Bienvenue '+profile.name+' ! Ton bureau est prêt.');$('logoutProfile').focus();
  for(const kind of ['files','editor']){const state=simWindows[kind];if(state.snap)snapWindow(kind,state.snap,false);else if(state.rect)setWindowRect(kind,state.rect)}
+ offerBadgeFilm();
 }
 function disconnectProfile(){
+ finishDemo(false);demoLastBadge=null;
  stopSpeech();closeContextMenu();saveActiveProfile();for(const id of ['dialog','docDialog','filePreview','badgeCelebration'])if($(id).open)$(id).close();
  resetDocumentDraft();resetSimWindows();activeProfile=null;progressRecords={};passedSteps.clear();lessonStats.clear();selectedProfileId=null;$('sessionShell').hidden=true;$('loginScreen').hidden=false;renderProfiles();$('addProfile').focus();
 }

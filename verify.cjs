@@ -9,8 +9,8 @@ const saved=new Map();
 const globals={document,console,listeners,window:{addEventListener(){},localStorage:{getItem(key){return saved.get(key)||null},setItem(key,value){saved.set(key,value)}}}};
 Object.defineProperty(globals,'location',{value:{href:'file:///index.html'},configurable:false});
 const context=vm.createContext(globals);
-vm.runInContext(fs.readFileSync('screen.js','utf8'),context);vm.runInContext(fs.readFileSync('profiles.js','utf8'),context);vm.runInContext(fs.readFileSync('file-clipboard.js','utf8'),context);vm.runInContext(fs.readFileSync('windows.js','utf8'),context);vm.runInContext(fs.readFileSync('practice.js','utf8'),context);vm.runInContext(fs.readFileSync('documents.js','utf8'),context);vm.runInContext(fs.readFileSync('advanced.js','utf8'),context);
-vm.runInContext(fs.readFileSync('journey.js','utf8'),context);vm.runInContext(fs.readFileSync('desktop-gestures.js','utf8'),context);vm.runInContext(fs.readFileSync('app.js','utf8'),context);
+vm.runInContext(fs.readFileSync('screen.js','utf8'),context);vm.runInContext(fs.readFileSync('profiles.js','utf8'),context);vm.runInContext(fs.readFileSync('file-clipboard.js','utf8'),context);vm.runInContext(fs.readFileSync('windows.js','utf8'),context);vm.runInContext(fs.readFileSync('practice.js','utf8'),context);vm.runInContext(fs.readFileSync('documents.js','utf8'),context);vm.runInContext(fs.readFileSync('selection.js','utf8'),context);vm.runInContext(fs.readFileSync('advanced.js','utf8'),context);
+vm.runInContext(fs.readFileSync('journey.js','utf8'),context);vm.runInContext(fs.readFileSync('desktop-gestures.js','utf8'),context);vm.runInContext(fs.readFileSync('tutorials.js','utf8'),context);vm.runInContext(fs.readFileSync('app.js','utf8'),context);
 vm.runInContext(`
 $('startBasics').onclick();$('images').onclick(); if(!completed)throw Error('clic');
 $('next').onclick();listeners.get('keydown')({key:'Enter',target:{id:'images',tagName:'BUTTON'},preventDefault(){}});if(!completed||$('window').hidden)throw Error('clic puis Entrée');
@@ -45,6 +45,7 @@ if(moveFile('archives','animals'))throw Error('cycle dossier accepté');
 $('next').onclick(); selected='note'; $('delete').onclick();if(!completed||entries.find(e=>e.id==='note').parent!=='trash')throw Error('suppression');
 $('next').onclick(); $('trash').ondblclick(); selected='note'; $('restore').onclick();if(!completed||entries.find(e=>e.id==='note').parent!=='root'||entries.find(e=>e.id==='note').name!=='Mon petit mémo')throw Error('restauration');
 const basicSnapshot=JSON.parse(JSON.stringify(entries));
+$('next').onclick();selectFile('multi-chat');selectFile('multi-fox',{ctrlKey:true});selectFile('multi-notes',{ctrlKey:true});if(!completed)throw Error('sélection organisateur');$('next').onclick();setFileSelection(['multi-chat','multi-fox','multi-notes']);moveSelection('multi-album');if(!completed)throw Error('rangement groupe');
 $('next').onclick();if(step!==pathStart||$('checkChallenge').hidden)throw Error('transition chemins');
 $('help').onclick();openFolder('town-notes');openEntry('decoy');if(completed)throw Error('homonyme trouvé au mauvais endroit accepté');$('filePreview').close();
 openFolder('notes');const observationButton=$('files').children.find(b=>b.dataset.entryId==='observation');observationButton.onclick();observationButton.closest=()=>observationButton;
@@ -72,6 +73,7 @@ dragged.onpointerdown(pointerEvent(125,85,1,2));if(mouseDragging)throw Error('cl
 dragged.onpointerdown(pointerEvent(125,85));dragged.onpointermove(pointerEvent(650,150));if(dragged.style.left!=='650px'||!mouseDragging)throw Error('image immobile pendant glissement');dragged.onpointerup(pointerEvent(400,150));if(mouseHits||mouseDragging||mouseWrong!==1)throw Error('dépôt extérieur');
 dragged=dragTarget();dragged.onpointerdown(pointerEvent(125,85));dragged.onpointercancel(pointerEvent(650,150));if(mouseHits||mouseDragging)throw Error('annulation valide un geste');
 for(let n=0;n<4;n++){const target=dragTarget();target.onpointerdown(pointerEvent(125,85));target.onpointermove(pointerEvent(650,150));target.onpointerup(pointerEvent(650,150))}if(!completed)throw Error('glisser-déposer souris');
+$('next').onclick();selectFile('multi-chat');selectFile('multi-fox',{ctrlKey:true});if(!completed)throw Error('Ctrl souris');$('next').onclick();selectionGesture='marquee';setFileSelection(['multi-chat','multi-fox','multi-map']);if(!completed)throw Error('rectangle souris');
 $('next').onclick();if(step!==basicStart||!$('window').hidden||!entries.some(e=>e.id==='photo'))throw Error('souris vers premiers fichiers');
 step=windowStart;prepareMission();mission();
 $('minimizeFiles').onclick();if(!completed||!$('window').hidden||$('taskFiles').hidden)throw Error('réduction');
@@ -179,25 +181,25 @@ step=shortcutStart+1;prepareMission();mission();const eventInput=$('docText');ev
 $('reset').onclick();
 `,context);
 const reload=vm.createContext({...globals});
-vm.runInContext(fs.readFileSync('screen.js','utf8'),reload);vm.runInContext(fs.readFileSync('profiles.js','utf8'),reload);vm.runInContext(fs.readFileSync('file-clipboard.js','utf8'),reload);vm.runInContext(fs.readFileSync('windows.js','utf8'),reload);vm.runInContext(fs.readFileSync('practice.js','utf8'),reload);vm.runInContext(fs.readFileSync('documents.js','utf8'),reload);vm.runInContext(fs.readFileSync('advanced.js','utf8'),reload);vm.runInContext(fs.readFileSync('journey.js','utf8'),reload);vm.runInContext(fs.readFileSync('desktop-gestures.js','utf8'),reload);vm.runInContext(fs.readFileSync('app.js','utf8'),reload);
+vm.runInContext(fs.readFileSync('screen.js','utf8'),reload);vm.runInContext(fs.readFileSync('profiles.js','utf8'),reload);vm.runInContext(fs.readFileSync('file-clipboard.js','utf8'),reload);vm.runInContext(fs.readFileSync('windows.js','utf8'),reload);vm.runInContext(fs.readFileSync('practice.js','utf8'),reload);vm.runInContext(fs.readFileSync('documents.js','utf8'),reload);vm.runInContext(fs.readFileSync('selection.js','utf8'),reload);vm.runInContext(fs.readFileSync('advanced.js','utf8'),reload);vm.runInContext(fs.readFileSync('journey.js','utf8'),reload);vm.runInContext(fs.readFileSync('desktop-gestures.js','utf8'),reload);vm.runInContext(fs.readFileSync('tutorials.js','utf8'),reload);vm.runInContext(fs.readFileSync('app.js','utf8'),reload);
 vm.runInContext("if(Object.keys(progressRecords).length!==missions.length||passedSteps.size)throw Error('rechargement carnet')",reload);
 const previousOrder=['Un premier clic','Ouvre le dossier','Crée un dossier','Donne un nom au fichier','Range ton image','Copie ton image','Renomme un dossier','Déplace un dossier','Utilise la corbeille','Répare une erreur','Trouve le bon fichier','Retrouve l’adresse du fichier','Place au bon endroit','Copie vers une autre branche','Construis un chemin','Le grand rangement','Vise avec le clic gauche','Choisis le clic droit','Entraîne le double-clic','Glisse sans lâcher','Crée un document texte','Nomme ton document','Enregistre au bon endroit','Retrouve et rouvre ton document'];
 const previousRecords={};const records=JSON.parse(saved.get('ordi-academie-achievements-v1'));previousOrder.forEach((title,id)=>previousRecords[id]=Object.values(records).find(r=>r.title===title));
 const reordered=vm.createContext({...globals,window:{addEventListener(){},localStorage:{getItem(){return JSON.stringify(previousRecords)},setItem(){}}}});
-for(const file of ['screen.js','profiles.js','file-clipboard.js','windows.js','practice.js','documents.js','advanced.js','journey.js','desktop-gestures.js','app.js'])vm.runInContext(fs.readFileSync(file,'utf8'),reordered);
+for(const file of ['screen.js','profiles.js','file-clipboard.js','windows.js','practice.js','documents.js','selection.js','advanced.js','journey.js','desktop-gestures.js','tutorials.js','app.js'])vm.runInContext(fs.readFileSync(file,'utf8'),reordered);
 vm.runInContext("if(Object.keys(progressRecords).length!==24||!progressRecords[basicStart]||!progressRecords[documentStart+3]||progressRecords[windowStart]||missions[0][0]!=='Vise avec le clic gauche')throw Error('migration du parcours précédent')",reordered);
 const legacyRecords=JSON.parse(saved.get('ordi-academie-achievements-v1'));
 const oldRecords={};for(const [id,record] of Object.entries(legacyRecords)){oldRecords[Number(id)<10?Number(id):Number(id)+6]={...record,title:record.title==='Retrouve l’adresse du fichier'?'Lis le chemin':record.title}}
 const legacy=vm.createContext({...globals,window:{addEventListener(){},localStorage:{getItem(){return JSON.stringify(oldRecords)},setItem(){}}}});
-vm.runInContext(fs.readFileSync('screen.js','utf8'),legacy);vm.runInContext(fs.readFileSync('profiles.js','utf8'),legacy);vm.runInContext(fs.readFileSync('file-clipboard.js','utf8'),legacy);vm.runInContext(fs.readFileSync('windows.js','utf8'),legacy);vm.runInContext(fs.readFileSync('practice.js','utf8'),legacy);vm.runInContext(fs.readFileSync('documents.js','utf8'),legacy);vm.runInContext(fs.readFileSync('advanced.js','utf8'),legacy);vm.runInContext(fs.readFileSync('journey.js','utf8'),legacy);vm.runInContext(fs.readFileSync('desktop-gestures.js','utf8'),legacy);vm.runInContext(fs.readFileSync('app.js','utf8'),legacy);
+vm.runInContext(fs.readFileSync('screen.js','utf8'),legacy);vm.runInContext(fs.readFileSync('profiles.js','utf8'),legacy);vm.runInContext(fs.readFileSync('file-clipboard.js','utf8'),legacy);vm.runInContext(fs.readFileSync('windows.js','utf8'),legacy);vm.runInContext(fs.readFileSync('practice.js','utf8'),legacy);vm.runInContext(fs.readFileSync('documents.js','utf8'),legacy);vm.runInContext(fs.readFileSync('selection.js','utf8'),legacy);vm.runInContext(fs.readFileSync('advanced.js','utf8'),legacy);vm.runInContext(fs.readFileSync('journey.js','utf8'),legacy);vm.runInContext(fs.readFileSync('desktop-gestures.js','utf8'),legacy);vm.runInContext(fs.readFileSync('tutorials.js','utf8'),legacy);vm.runInContext(fs.readFileSync('app.js','utf8'),legacy);
 vm.runInContext("if(Object.keys(progressRecords).length!==missions.length-1||progressRecords[pathStart+1]||!progressRecords[mouseStart+3]||badgeDefinitions().length!==10)throw Error('migration ancien carnet')",legacy);
 const noStorage=vm.createContext({...globals,window:{addEventListener(){},localStorage:{getItem(){throw Error('stockage interdit')},setItem(){throw Error('stockage interdit')}}}});
-vm.runInContext(fs.readFileSync('screen.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('profiles.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('file-clipboard.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('windows.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('practice.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('documents.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('advanced.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('journey.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('desktop-gestures.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('app.js','utf8'),noStorage);
+vm.runInContext(fs.readFileSync('screen.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('profiles.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('file-clipboard.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('windows.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('practice.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('documents.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('selection.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('advanced.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('journey.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('desktop-gestures.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('tutorials.js','utf8'),noStorage);vm.runInContext(fs.readFileSync('app.js','utf8'),noStorage);
 vm.runInContext("$('startBasics').onclick();$('images').onclick();if(!completed||progressAvailable||!progressRecords[basicStart])throw Error('repli sans stockage')",noStorage);
-console.log('55 missions : fichiers, chemins, souris, documents TAda, saisie, presse-papiers, raccourcis, extensions masquées, doublons, corbeille, badges et sauvegarde : OK');
+console.log('59 missions : fichiers, chemins, souris, documents TAda, saisie, presse-papiers, raccourcis, extensions masquées, doublons, corbeille, badges et sauvegarde : OK');
 
 const profileContext=vm.createContext({...globals});
-for(const file of ['profiles.js','file-clipboard.js','windows.js','practice.js','documents.js','advanced.js','journey.js','desktop-gestures.js','app.js'])vm.runInContext(fs.readFileSync(file,'utf8'),profileContext);
+for(const file of ['profiles.js','file-clipboard.js','windows.js','practice.js','documents.js','selection.js','advanced.js','journey.js','desktop-gestures.js','tutorials.js','app.js'])vm.runInContext(fs.readFileSync(file,'utf8'),profileContext);
 vm.runInContext(`
 if(!$('sessionShell').hidden||$('loginScreen').hidden||activeProfile)throw Error('connexion non obligatoire');
 const createStudent=name=>{$('addProfile').onclick();$('profileName').value=name;$('profileForm').onsubmit({preventDefault(){}});return studentProfiles.find(p=>p.name===name)};
@@ -214,12 +216,12 @@ if(JSON.parse(window.localStorage.getItem('ordi-academie-student-'+eva.id))[basi
 const evaId=eva.id;disconnectProfile();
 `,profileContext);
 const profileReload=vm.createContext({...globals});
-for(const file of ['profiles.js','file-clipboard.js','windows.js','practice.js','documents.js','advanced.js','journey.js','desktop-gestures.js','app.js'])vm.runInContext(fs.readFileSync(file,'utf8'),profileReload);
+for(const file of ['profiles.js','file-clipboard.js','windows.js','practice.js','documents.js','selection.js','advanced.js','journey.js','desktop-gestures.js','tutorials.js','app.js'])vm.runInContext(fs.readFileSync(file,'utf8'),profileReload);
 vm.runInContext(`const restored=studentProfiles.find(p=>p.name==='Éva');if(!restored||!$('sessionShell').hidden)throw Error('rechargement profils');connectProfile(restored.id);if(Object.keys(progressRecords).length!==1||documentDraft.content!=='Bonjour Éva, brouillon')throw Error('rechargement session élève');`,profileReload);
 console.log('Profils : accueil, création, doublons, connexion, bureaux et badges séparés, brouillons et rechargement : OK');
 
 const fallbackProfiles=vm.createContext({...globals,window:{addEventListener(){},localStorage:{getItem(){throw Error('stockage interdit')},setItem(){throw Error('stockage interdit')}}}});
-for(const file of ['profiles.js','file-clipboard.js','windows.js','practice.js','documents.js','advanced.js','journey.js','desktop-gestures.js','app.js'])vm.runInContext(fs.readFileSync(file,'utf8'),fallbackProfiles);
+for(const file of ['profiles.js','file-clipboard.js','windows.js','practice.js','documents.js','selection.js','advanced.js','journey.js','desktop-gestures.js','tutorials.js','app.js'])vm.runInContext(fs.readFileSync(file,'utf8'),fallbackProfiles);
 vm.runInContext(`$('addProfile').onclick();$('profileName').value='Session temporaire';$('profileForm').onsubmit({preventDefault(){}});const temporary=studentProfiles.find(p=>p.name==='Session temporaire');connectProfile(temporary.id);$('startBasics').onclick();$('images').onclick();disconnectProfile();connectProfile(temporary.id);if(!progressRecords[basicStart]||profilesAvailable)throw Error('profils sans stockage');`,fallbackProfiles);
 console.log('Profils sans stockage : séparation et reprise pendant la visite : OK');
 
@@ -231,7 +233,7 @@ console.log('Affichage : profils limités à quatre par page : OK');
 
 const replayElements=new Map();
 const replayContext=vm.createContext({...globals,document:{...document,getElementById(id){if(!replayElements.has(id))replayElements.set(id,element());return replayElements.get(id)}},window:{addEventListener(){},confirm(){return true},localStorage:{getItem(){return null},setItem(){}}}});
-for(const file of ['screen.js','profiles.js','file-clipboard.js','windows.js','practice.js','documents.js','advanced.js','journey.js','desktop-gestures.js','app.js'])vm.runInContext(fs.readFileSync(file,'utf8'),replayContext);
+for(const file of ['screen.js','profiles.js','file-clipboard.js','windows.js','practice.js','documents.js','selection.js','advanced.js','journey.js','desktop-gestures.js','tutorials.js','app.js'])vm.runInContext(fs.readFileSync(file,'utf8'),replayContext);
 vm.runInContext(`
 window.confirm=()=>true;
 const earnedBefore=Object.keys(progressRecords).length;
@@ -251,9 +253,9 @@ celebrateBadge('Premier bureau');if(!$('badgeCelebration').open||!$('celebration
 const old={id:'old-v1',name:'Ancien élève',avatar:'🦊',records:{a:{title:missions[basicStart][0],date:new Date().toISOString(),help:0,attempts:0},b:{title:missions[basicStart+1][0],date:new Date().toISOString(),help:0,attempts:0}}};
 studentProfiles.push(old);documentDraft.dirty=false;connectProfile(old.id);if(!badgeEarned(badgeDefinitions()[0])||progressRecords[basicStart+2]||old.journeyVersion!==2)throw Error('ancien badge perdu ou nouvelles missions déjà validées');
 if(!$('startBasics')['aria-label'].includes('badge obtenu')||$('startOrganizer')['aria-label'].includes('badge obtenu'))throw Error('sections vertes confondent les badges');
-replayMission(basicStep(2));$('followingSteps').onclick();if($('steps').children.length!==3||visibleBadgeSteps().length!==8)throw Error('pagination du badge Organisateur');
+replayMission(basicStep(2));$('followingSteps').onclick();if($('steps').children.length!==5||visibleBadgeSteps().length!==10)throw Error('pagination du badge Organisateur');
 `,replayContext);
-console.log('Reprise des 55 missions, documents autonomes, félicitations et anciens badges : OK');
+console.log('Reprise des 59 missions, documents autonomes, félicitations et anciens badges : OK');
 vm.runInContext(`
 documentDraft.dirty=false;replayMission(basicStep(4));
 const fileSource=()=>{const b=$('files').children.find(el=>el.dataset.entryId==='photo');b.setPointerCapture=()=>{};b.releasePointerCapture=()=>{};b.cloneNode=()=>{const ghost=document.createElement('button');ghost.removeAttribute=()=>{};ghost.remove=()=>ghost.removed=true;return ghost};return b};
@@ -270,7 +272,7 @@ const snapshot=profileSnapshot();if(snapshot.windows.editor.snap!=='right'||!sna
 console.log('Glissement de fichiers, poignées, accrochage, annulation et brouillons : OK');
 const deleteElements=new Map(),deleteStorage=new Map();
 const deleteContext=vm.createContext({...globals,document:{...document,getElementById(id){if(!deleteElements.has(id))deleteElements.set(id,element());return deleteElements.get(id)}},window:{addEventListener(){},localStorage:{getItem(key){return deleteStorage.get(key)||null},setItem(key,value){deleteStorage.set(key,value)},removeItem(key){deleteStorage.delete(key)}}}});
-for(const file of ['screen.js','profiles.js','file-clipboard.js','windows.js','practice.js','documents.js','advanced.js','journey.js','desktop-gestures.js','app.js'])vm.runInContext(fs.readFileSync(file,'utf8'),deleteContext);
+for(const file of ['screen.js','profiles.js','file-clipboard.js','windows.js','practice.js','documents.js','selection.js','advanced.js','journey.js','desktop-gestures.js','tutorials.js','app.js'])vm.runInContext(fs.readFileSync(file,'utf8'),deleteContext);
 vm.runInContext(`
 const createForDelete=name=>{$('addProfile').onclick();$('profileName').value=name;$('profileForm').onsubmit({preventDefault(){}});return studentProfiles.find(p=>p.name===name)};
 const doomed=createForDelete('Profil à supprimer'),kept=createForDelete('Profil à garder');
@@ -304,3 +306,22 @@ vm.runInContext(`(async()=>{
   delete window.__TAURI__;
   console.log('Voix native : lecture, arrêt, réponse tardive et erreur : OK');
 })()`,context).catch(error=>{console.error(error);process.exitCode=1});
+
+vm.runInContext(`
+documentDraft.dirty=false;replayMission(organizerSelectionStart+1);
+selectFile('multi-chat');selectFile('multi-fox',{ctrlKey:true});selectFile('multi-notes',{ctrlKey:true});if(selectionIds().length!==3)throw Error('sélection Ctrl multiple');
+selectFile('multi-fox',{ctrlKey:true});if(selectionIds().includes('multi-fox'))throw Error('Ctrl ne retire pas');
+selectFile('multi-chat');selectFile('multi-notes',{shiftKey:true});if(selectionIds().length!==3)throw Error('plage Maj');
+copySelected();openFolder('multi-album');pasteClipboard();if(entries.filter(e=>e.parent==='multi-album').length!==3||entries.find(e=>e.id==='multi-chat').parent!=='root'||!entries.some(e=>e.copiedFrom==='multi-note'))throw Error('copie groupe avec dossier');
+openFolder('root');setFileSelection(['multi-chat','multi-fox','multi-notes']);if(moveSelection('multi-notes'))throw Error('cycle de groupe');if(entries.find(e=>e.id==='multi-chat').parent!=='root')throw Error('déplacement partiel');
+if(moveSelection('multi-album'))throw Error('collision de groupe');if(entries.find(e=>e.id==='multi-fox').parent!=='root')throw Error('collision déplace une partie du groupe');
+setFileSelection(['multi-chat','multi-fox']);deleteSelected();if(entries.find(e=>e.id==='multi-chat').parent!=='trash')throw Error('corbeille groupe');openFolder('trash');setFileSelection(['multi-chat','multi-fox']);restoreSelected();if(entries.find(e=>e.id==='multi-fox').parent!=='root')throw Error('restauration groupe');
+replayMission(organizerSelectionStart+1);setFileSelection(['multi-chat','multi-fox','multi-notes']);cutSelected();openFolder('multi-album');pasteClipboard();if(!completed||clipboard||entries.find(e=>e.id==='multi-note').parent!=='multi-notes')throw Error('couper groupe');
+replayMission(mouseStart+5);const grid=$('files'),handlers={};grid.addEventListener=(name,fn)=>handlers[name]=fn;grid.setPointerCapture=()=>{};grid.releasePointerCapture=()=>{};grid.children.forEach((button,i)=>button.getBoundingClientRect=()=>({left:20+i*100,right:90+i*100,top:20,bottom:90}));const createOld=document.createElement;document.createElement=()=>{const e=createOld();e.remove=()=>{};return e};initializeSelection();
+const marqueeEvent=(x,y,type)=>({button:0,pointerId:5,clientX:x,clientY:y,type,target:{closest(){return null}},preventDefault(){}});handlers.pointerdown(marqueeEvent(5,5));handlers.pointermove(marqueeEvent(310,110));handlers.pointerup(marqueeEvent(310,110,'pointerup'));if(!completed||selectionIds().length!==3)throw Error('vrai gestionnaire rectangle');
+replayMission(mouseStart+5);handlers.pointerdown(marqueeEvent(5,5));handlers.pointermove(marqueeEvent(310,110));handlers.pointercancel(marqueeEvent(310,110,'pointercancel'));if(completed||selectionIds().length)throw Error('rectangle annulé validé');document.createElement=createOld;
+replayMission(mouseStart+5);selectionGesture='marquee';setFileSelection(['multi-chat','multi-fox'],false);selectFile('multi-map',{ctrlKey:true});if(completed)throw Error('Ctrl remplace le geste rectangle');
+const owner=studentProfiles.find(p=>p.id===activeProfile?.id);if(owner){saveActiveProfile();const idsBefore=selectionIds().join();disconnectProfile();connectProfile(owner.id);if(selectionIds().join()!==idsBefore)throw Error('sélection groupe perdue au retour profil')}
+if(Object.keys(badgeFilms).length!==10||folderFilm.length!==4)throw Error('présentations incomplètes');
+`,context);
+console.log('Sélection multiple : Ctrl, Maj, rectangle, annulation, groupes, collisions, dossiers et presse-papiers : OK');

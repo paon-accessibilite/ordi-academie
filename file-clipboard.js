@@ -20,6 +20,7 @@ function checkFileClipboardMission(action,sourceId){
  if(n===3&&action==='cut-paste'&&sourceId==='clip-album'&&entry(sourceId)?.parent==='clip-archives'&&entry('clip-photo')?.parent===sourceId)success();
 }
 function cutSelected(){
+ if(selectionIds().length>1){batchClipboard("cut");return}
  const entry=entries.find(e=>e.id===selected);if(!entry||isTrashed(entry.id)){tell('Sélectionne un fichier ou dossier à couper.');return}
  clipboard={mode:'cut',sourceId:entry.id};renderFiles();tell('Élément prêt à déplacer. Il reste ici jusqu’au collage dans un autre dossier.');
 }

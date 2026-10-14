@@ -50,8 +50,8 @@ function renderBadgeJourney(){
  heading.textContent=badge.icon+' Objectif : '+badge.name;
  status.textContent=count+' / '+badge.steps.length+' missions réussies'+(badgeEarned(badge)?' · Badge obtenu !':'');
  const progress=document.createElement('progress');progress.max=badge.steps.length;progress.value=count;progress.setAttribute('aria-label','Progression du badge '+badge.name);
- const retry=document.createElement('button');retry.type='button';retry.textContent='↻ Refaire cette mission';retry.onclick=()=>replayMission(step);
- panel.append(heading,status,progress,retry);
+ const retry=document.createElement('button');retry.type='button';retry.textContent='↻ Refaire';retry.setAttribute('aria-label','Refaire cette mission');retry.onclick=()=>replayMission(step);
+ const film=document.createElement('button');film.type='button';film.textContent='▶ Présentation';film.setAttribute('aria-label','Voir la présentation de ce badge');film.onclick=()=>openDemo('badge');const tools=document.createElement('div');tools.className='badge-film-actions';tools.append(retry,film);panel.append(heading,status,progress,tools);
  if(completed)$('feedback').textContent=missionSuccessMessage();
 }
 function missionSuccessMessage(){const badge=currentBadge();return '✓ Mission réussie !'+(badge?' '+badge.name+' : '+badge.steps.filter(i=>progressRecords[i]).length+' / '+badge.steps.length+'.':'')}

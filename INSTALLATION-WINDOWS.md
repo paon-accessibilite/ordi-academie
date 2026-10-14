@@ -1,8 +1,8 @@
-# Ordi Académie 0.2.0 pour Windows
+# Ordi Academie 0.3.0 pour Windows — version à valider
 
 ## Installer
 
-1. Télécharger `Ordi-Academie-0.2.0-windows-x64-setup.exe` depuis la release officielle du dépôt PAON.
+1. Utiliser l’installeur local `Ordi-Academie-0.3.0-windows-x64-setup.exe`. Cette version de test n’est pas encore publiée.
 2. Lancer l’installeur et suivre les étapes en français.
 3. Ouvrir **Ordi Academie** dans le menu Démarrer, dossier **PAON**.
 4. Créer un profil élève, puis se connecter au bureau simulé.
@@ -14,7 +14,7 @@ La première version n’est pas signée avec un certificat de signature de code
 - Sources : https://github.com/paon-accessibilite/ordi-academie
 - Téléchargement : https://github.com/paon-accessibilite/ordi-academie/releases/tag/v0.2.0
 
-Le fichier `SHA256SUMS-windows.txt` de la release permet de comparer l’empreinte du téléchargement avec `Get-FileHash -Algorithm SHA256` dans PowerShell.
+Pour les versions publiées, le fichier `SHA256SUMS-windows.txt` de la release permet de comparer l’empreinte du téléchargement avec `Get-FileHash -Algorithm SHA256` dans PowerShell.
 
 ## Utiliser en classe
 

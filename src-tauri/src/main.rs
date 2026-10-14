@@ -38,7 +38,7 @@ fn main() {
             Ok(())
         })
         .run(tauri::generate_context!())
-        .expect("Impossible de démarrer Ordi Académie");
+        .expect("Impossible de démarrer Ordi Academie");
 }
 
 // Test Linux : vrai clic X11, réservé au processus lancé avec --smoke-test.
@@ -106,7 +106,12 @@ async fn desktop_speech(app: tauri::AppHandle, text: String) -> Result<Option<Ve
 
 #[tauri::command]
 fn desktop_smoke_report(app: tauri::AppHandle, state: tauri::State<'_, SmokeReport>, report: serde_json::Value) -> Result<(), String> {
+    use tauri::Manager;
     let path = state.0.as_ref().ok_or("Le mode test est désactivé")?;
+    let mut report = report;
+    if let Some(window) = app.get_webview_window("main") {
+        report["nativeTitle"] = window.title().map_err(|error| error.to_string())?.into();
+    }
     let content = serde_json::to_vec_pretty(&report).map_err(|error| error.to_string())?;
     std::fs::write(path, content).map_err(|error| error.to_string())?;
     app.exit(if report["ok"] == true { 0 } else { 1 });

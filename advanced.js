@@ -11,7 +11,8 @@ const mouseExercises=[
   ['Vise avec le clic gauche','Clique avec le bouton gauche sur six cibles fromage. La cible change de place après chaque réussite.','Place le pointeur au centre du fromage, puis clique une seule fois. Tu peux agrandir les cibles.', 'left',6],
   ['Choisis le clic droit','Clique avec le bouton droit sur six cibles rouges.','Utilise le bouton droit de la souris. Le menu du navigateur ne s’ouvre pas dans cette zone.', 'right',6],
   ['Entraîne le double-clic','Fais cinq doubles-clics sur les cibles jaunes. Tu peux choisir un délai plus souple.','Deux clics gauches sur la même cible. Reste au même endroit entre les deux clics ; une première pression ne déplace pas la cible.', 'double',5],
-  ['Glisse sans lâcher','Glisse quatre petites souris dans leur maison verte.','Maintiens le bouton gauche sur la souris, déplace-la jusque dans la maison, puis relâche. Si c’est difficile, réessaie tranquillement.', 'drag',4]
+  ['Glisse sans lâcher','Glisse quatre petites souris dans leur maison verte.','Maintiens le bouton gauche sur la souris, déplace-la jusque dans la maison, puis relâche. Si c’est difficile, réessaie tranquillement.', 'drag',4],
+  ...multiExercises.slice(0,2).map(e=>[...e,'multi',1])
 ];
 let pathStart=0,mouseStart=0,lastOpenedEntry=null,mouseHits=0,mouseWrong=0,mouseFirstClick=null,mouseDragging=false;
 const lessonStats=new Map();
@@ -23,9 +24,9 @@ function noteHelp(){const stats=lessonStats.get(step)||{help:0,attempts:0};stats
 function noteAttempt(){const stats=lessonStats.get(step)||{help:0,attempts:0};stats.attempts++;lessonStats.set(step,stats)}
 function badgeDefinitions(){return [
   {name:'Premier bureau',icon:'🌱',steps:Array.from({length:6},(_,i)=>basicStart+i),skill:'Sélectionner, ouvrir un dossier, entrer dans un sous-dossier et revenir à la racine'},
-  {name:'Organisateur',icon:'📁',steps:Array.from({length:8},(_,i)=>basicStep(i+2)),skill:'Créer, renommer, déplacer, copier et restaurer'},
+  {name:'Organisateur',icon:'📁',steps:[...Array.from({length:8},(_,i)=>basicStep(i+2)),organizerSelectionStart,organizerSelectionStart+1],skill:'Créer, renommer, déplacer, copier et restaurer'},
   {name:'Explorateur des chemins',icon:'🧭',steps:Array.from({length:6},(_,i)=>i+pathStart),skill:'Lire un chemin et trouver le bon fichier'},
-  {name:'Souris agile',icon:'🐭',steps:Array.from({length:4},(_,i)=>i+mouseStart),skill:'Clic gauche, clic droit, double-clic et glisser-déposer'},
+  {name:'Souris agile',icon:'🐭',steps:Array.from({length:mouseExercises.length},(_,i)=>i+mouseStart),skill:'Clic gauche, clic droit, double-clic et glisser-déposer et sélection multiple'},
   {name:'Maître des fenêtres',icon:'▣',steps:Array.from({length:windowExercises.length},(_,i)=>i+windowStart),skill:'Réduire, retrouver, agrandir, fermer, redimensionner et travailler en demi-écran'},
   {name:'Fichiers bien rangés',icon:'⧉',steps:Array.from({length:4},(_,i)=>i+fileClipboardStart),skill:'Copier, coller, couper et déplacer un dossier avec son contenu'},
   {name:'Auteur en herbe',icon:'📝',steps:Array.from({length:4},(_,i)=>i+documentStart),skill:'Créer, nommer, enregistrer et retrouver un document'},
@@ -64,6 +65,7 @@ function renderBadges(allRows=false){
 function initializeAdvanced(){
   const basics=missions.splice(0);mouseStart=0;mouseExercises.forEach(e=>missions.push(e.slice(0,3)));
   basicStart=missions.length;missions.push(...basics.slice(0,2),...navigationExercises,...basics.slice(2));
+  organizerSelectionStart=missions.length;missions.push(...multiExercises.slice(2));
   pathStart=missions.length;pathExercises.forEach(e=>missions.push(e.slice(0,3)));
   windowStart=missions.length;windowExercises.forEach(e=>missions.push(e));
   fileClipboardStart=missions.length;fileClipboardExercises.forEach(e=>missions.push(e));
@@ -80,7 +82,7 @@ function initializeAdvanced(){
   $('startBasics').onclick=()=>{$('reset').onclick();if(documentDraft.dirty)return;step=basicStart;prepareMission();mission();$('badgePanel').hidden=true};
   const start=index=>{if(!mayLeaveDocument())return;resetDocumentDraft();resetSimWindows();if($('docDialog').open)$('docDialog').close();stopSpeech();closeContextMenu();if($('dialog').open)$('dialog').close();if($('filePreview').open)$('filePreview').close();step=index;prepareMission();mission();tell('À toi de jouer !');$('badgePanel').hidden=true};
   $('startPaths').onclick=()=>start(pathStart);$('startMouse').onclick=()=>start(mouseStart);$('startOrganizer').onclick=()=>replayMission(basicStep(2));
-  $('showBadges').onclick=()=>{renderBadges();$('badgePanel').hidden=!$('badgePanel').hidden;if(!$('badgePanel').hidden)$('badgePanel').scrollIntoView?.({behavior:'smooth',block:'start'})};
+  $('showBadges').onclick=()=>{finishDemo(false);renderBadges();$('badgePanel').hidden=!$('badgePanel').hidden;if(!$('badgePanel').hidden)$('badgePanel').scrollIntoView?.({behavior:'smooth',block:'start'})};
   $('teacherDetails').ontoggle=()=>{$('badgePanel').classList.toggle('teacher-view',$('teacherDetails').open)};$('previousReport').onclick=()=>{reportPage=Math.max(0,reportPage-1);renderBadges()};$('followingReport').onclick=()=>{reportPage=Math.min(Math.ceil(missions.length/8)-1,reportPage+1);renderBadges()};
   $('closeBadges').onclick=()=>{$('badgePanel').hidden=true};$('printBadges').onclick=()=>{$('teacherDetails').open=true;renderBadges(true);window.print();renderBadges()};
   $('checkChallenge').onclick=()=>checkChallenge(true);$('retryChallenge').onclick=()=>{noteAttempt();passedSteps.delete(step);prepareAdvancedMission();mission();tell('Le défi est prêt pour un nouvel essai.')};
@@ -104,11 +106,11 @@ function prepareAdvancedMission(){
   if(isMouseMission()){$('window').hidden=true;selected=null;return true}return false;
 }
 function renderAdvancedExercise(){
-  $('challengePanel').hidden=!(isPathMission()&&step===pathStart+1);$('checkChallenge').hidden=!isPathMission();$('retryChallenge').hidden=!isPathMission();$('mousePanel').hidden=!isMouseMission();
+  $('challengePanel').hidden=!(isPathMission()&&step===pathStart+1);$('checkChallenge').hidden=!isPathMission();$('retryChallenge').hidden=!isPathMission();$('mousePanel').hidden=!isMouseMission()||isMultiMission();
   $('docCheck').hidden=!isDocumentMission()||step===documentStart+2||step===documentStart+3||currentTextExercise()?.skill==='save';renderTextPractice();
   if(!isDocumentMission()&&step!==windowStart+9)hideSimWindow('editor');
-  $('desktop').hidden=isMouseMission();if(isPathMission()){$('desktop').hidden=false;const read=step===pathStart+1;$('pathChoices').hidden=!read;if(read)renderPathChoices();renderBreadcrumb()}
-  if(isMouseMission()){$('desktop').hidden=true;mouseHits=0;mouseWrong=0;mouseFirstClick=null;mouseDragging=false;renderMouseTarget()}
+  $('desktop').hidden=isMouseMission()&&!isMultiMission();if(isPathMission()){$('desktop').hidden=false;const read=step===pathStart+1;$('pathChoices').hidden=!read;if(read)renderPathChoices();renderBreadcrumb()}
+  if(isMouseMission()&&!isMultiMission()){$('desktop').hidden=true;mouseHits=0;mouseWrong=0;mouseFirstClick=null;mouseDragging=false;renderMouseTarget()}
 }
 function renderBreadcrumb(){
   const chain=[];let id=currentFolder;

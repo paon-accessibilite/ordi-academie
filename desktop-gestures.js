@@ -7,18 +7,18 @@ function enableFilePointerDrag(button,id){
  const clear=()=>{ghost?.remove();ghost=null;pointer=null;start=null};
  button.onpointerdown=event=>{
   if(event.button!==0||currentFolder==='trash')return;
-  ignoreClick=false;button.onclick();focusSimWindow('files');pointer=event.pointerId;start={x:event.clientX,y:event.clientY};button.setPointerCapture(pointer);
+  ignoreClick=false;if(!event.ctrlKey&&!event.metaKey&&!event.shiftKey&&!selectionIds().includes(id))button.onclick(event);focusSimWindow('files');pointer=event.pointerId;start={x:event.clientX,y:event.clientY};button.setPointerCapture(pointer);
  };
  button.onpointermove=event=>{
   if(event.pointerId!==pointer||Math.hypot(event.clientX-start.x,event.clientY-start.y)<6&&!ghost)return;
-  event.preventDefault();if(!ghost){ghost=button.cloneNode(true);ghost.className='file file-drag-ghost';ghost.removeAttribute('id');ghost.setAttribute('aria-hidden','true');document.body.append(ghost)}
+  event.preventDefault();if(!ghost){ghost=button.cloneNode(true);ghost.className='file file-drag-ghost';ghost.removeAttribute('id');ghost.setAttribute('aria-hidden','true');if(selectionIds().length>1){const count=document.createElement('small');count.className='drag-count';count.textContent=selectionIds().length+' éléments';ghost.append(count)}document.body.append(ghost)}
   ghost.style.left=event.clientX+12+'px';ghost.style.top=event.clientY+12+'px';
  };
  button.onpointerup=event=>{
   if(event.pointerId!==pointer)return;const dragged=!!ghost;
   const folder=dragged?document.elementsFromPoint(event.clientX,event.clientY).map(el=>el.closest?.('.file')).find(el=>entries.some(e=>e.id===el?.dataset.entryId&&e.type==='folder')):null;
   ignoreClick=dragged;clear();button.releasePointerCapture(event.pointerId);
-  if(dragged){event.preventDefault();if(folder)moveFile(id,folder.dataset.entryId);else tell('Dépose cet élément sur un dossier. Il reste à sa place.')}
+  if(dragged){event.preventDefault();if(folder){if(selectionIds().length>1)moveSelection(folder.dataset.entryId);else moveFile(id,folder.dataset.entryId)}else tell('Dépose cet élément sur un dossier. Il reste à sa place.')}
  };
  button.onpointercancel=clear;button.onlostpointercapture=clear;
 }

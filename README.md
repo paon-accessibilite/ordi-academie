@@ -1,6 +1,12 @@
-# Ordi Académie
+# Ordi Academie
 
-## Windows 0.2.0 et Linux 0.2.1
+## Version 0.3.0 Windows — à valider
+
+59 missions. Dix présentations animées, commentées et sous-titrées dans le PC virtuel, avec lecture, pause, étapes et voix désactivable. Le bouton **Montre-moi** accompagne la création du premier dossier. Sélection multiple avec Ctrl + clic, Maj + clic, rectangle et Ctrl+A ; opérations sur les groupes (déplacement, copie, coupe, corbeille et restauration). Quatre nouvelles missions. Les profils existants et badges sont conservés.
+
+Cette version Windows reste locale jusqu’à validation. Aucune publication 0.3 ni compilation Linux.
+
+## Versions publiées : Windows 0.2.0 et Linux 0.2.1
 
 La version Linux 0.2.1 rétablit les menus du clic droit dans Organisateur,
 avec un test de clic réel sous X11 pour la création et le renommage.
@@ -40,7 +46,7 @@ Xfce isolé sans réseau. Ce test ne remplace pas un essai sur un PC Mint physiq
 
 Prototype pédagogique autonome en français, sans installation ni connexion.
 
-Ouvrir `index.html` dans Firefox, Chrome ou Edge sous Windows ou Linux. Les 55 missions enseignent les gestes souris, la gestion des fichiers et dossiers, les chemins, les fenêtres et le traitement de texte. Un écran de connexion permet de créer et choisir un profil élève. Le bureau, les documents, les brouillons et le carnet de réussites sont conservés localement pour chaque profil quand le stockage du navigateur est disponible.
+Ouvrir `index.html` dans Firefox, Chrome ou Edge sous Windows ou Linux. Les 59 missions enseignent les gestes souris, la gestion des fichiers et dossiers, les chemins, les fenêtres et le traitement de texte. Un écran de connexion permet de créer et choisir un profil élève. Le bureau, les documents, les brouillons et le carnet de réussites sont conservés localement pour chaque profil quand le stockage du navigateur est disponible.
 
 Le bouton 🔊 à côté de la consigne, du coup de pouce ou de la demande de saisie lit son texte. Un second clic arrête la lecture, ainsi que le changement de mission. La synthèse vocale du navigateur privilégie une voix française locale lorsqu'elle est disponible. La disponibilité des voix et leur fonctionnement hors connexion dépendent du navigateur et du système ; un message apparaît si la lecture ne peut pas démarrer. Aucun service audio externe ni clé API n'est configuré dans ce projet.
 

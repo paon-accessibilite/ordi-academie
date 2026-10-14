@@ -1,6 +1,6 @@
 {
   "name": "ordi-academie",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "private": true,
   "description": "Un ordinateur simulé pour apprendre les premiers gestes numériques",
   "scripts": {

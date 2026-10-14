@@ -1,8 +1,9 @@
 (async()=>{
  const checks=[];const assert=(value,label)=>{if(!value)throw Error(label);checks.push(label)};
- const report={version:'0.2.1',ok:false,checks};
+ window.__ordiSkipDemos=true;
+ const report={version:'0.3.0',ok:false,checks};
  try{
-  assert(missions.length===55,'55 missions chargées dans le moteur embarqué');
+  assert(missions.length===59,'59 missions chargées dans le moteur embarqué');
   assert(!$('loginScreen').hidden&&$('sessionShell').hidden,'Écran de connexion au démarrage');
   const create=name=>{let profile=studentProfiles.find(p=>p.name===name);if(profile)return profile;$('addProfile').onclick();$('profileName').value=name;$('profileAvatar').value='🦊';$('profileForm').onsubmit({preventDefault(){}});return studentProfiles.find(p=>p.name===name)};
   const first=create('Test bureau A'),second=create('Test bureau B');
@@ -28,6 +29,23 @@
     const aside=document.querySelector('aside');assert(aside.scrollHeight<=aside.clientHeight+1,'Parcours sans défilement : '+missions[i][0]);
   }
   assert(Object.keys(progressRecords).length===savedCount,'Rejouer conserve les acquis');
+  for(const badge of badgeDefinitions()){
+    documentDraft.dirty=false;replayMission(badge.steps[0]);openDemo('badge');
+    const panel=$('tutorialPanel').getBoundingClientRect(),area=$('desktop').getBoundingClientRect();
+    assert(panel.left>=area.left&&panel.right<=area.right&&panel.bottom<=area.bottom,'Présentation dans le PC : '+badge.name);
+    assert($('tutorialPanel').scrollHeight<=$('tutorialPanel').clientHeight+1,'Présentation sans défilement : '+badge.name);
+    for(let i=0;i<demo.scenes.length;i++){demo.index=i;renderDemoFrame();const caption=$('tutorialCaption').getBoundingClientRect(),controls=document.querySelector('.tutorial-controls').getBoundingClientRect();assert(caption.bottom<=controls.top+1&&controls.bottom<=panel.bottom,'Sous-titres visibles : '+badge.name+' '+i)}
+    finishDemo(false);
+  }
+  replayMission(basicStep(2));const beforeDemo=JSON.stringify(entries);openDemo('folder');demo.voice=false;await playDemoFrame();assert(demo.playing,'Démonstration locale démarrée');finishDemo(false);assert(!demo&&JSON.stringify(entries)===beforeDemo,'Démonstration arrêtée sans modifier les fichiers');
+  replayMission(organizerSelectionStart+1);selectFile('multi-chat');selectFile('multi-fox',{ctrlKey:true});selectFile('multi-notes',{ctrlKey:true});assert(selectionIds().length===3,'Ctrl sélectionne trois éléments');moveSelection('multi-album');assert(completed,'Déplacement de groupe validé');
+  replayMission(mouseStart+5);const area=$('files').getBoundingClientRect(),cards=Array.from($('files').children).map(el=>el.getBoundingClientRect());
+  const left=Math.min(...cards.map(r=>r.left))-3,top=Math.min(...cards.map(r=>r.top))-3,right=Math.max(...cards.map(r=>r.right))+3,bottom=Math.max(...cards.map(r=>r.bottom))+3;
+  $('files').dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,button:0,pointerId:22,clientX:left,clientY:top}));
+  $('files').dispatchEvent(new PointerEvent('pointermove',{bubbles:true,button:0,pointerId:22,clientX:right,clientY:bottom}));
+  $('files').dispatchEvent(new PointerEvent('pointerup',{bubbles:true,button:0,pointerId:22,clientX:right,clientY:bottom}));
+  assert(selectionIds().length===3&&completed,'Rectangle de sélection dans le moteur Windows');
+
   documentDraft.dirty=false;replayMission(basicStep(4));
   assert(typeof document.querySelector('.file[data-entry-id="photo"]').onpointerdown==='function','Glissement de fichier relié au pointeur');
   replayMission(windowStart+9);snapWindow('files','left');snapWindow('editor','right');
@@ -89,6 +107,14 @@
   submitProfileDeletion();assert(pendingProfileDeletion.stage===1&&studentProfiles.some(p=>p.id===disposable.id),'Première confirmation ne supprime pas');
   $('deleteProfileName').value=disposable.name;submitProfileDeletion();assert(pendingProfileDeletion.stage===2&&studentProfiles.some(p=>p.id===disposable.id),'Nom confirmé : dernière étape encore nécessaire');
   submitProfileDeletion();assert(!studentProfiles.some(p=>p.id===disposable.id)&&studentProfiles.some(p=>p.id===first.id)&&studentProfiles.some(p=>p.id===second.id),'Suppression confirmée du seul profil de test');
+  const intro=create('Test présentations 0.3');intro.introductionsShown=[];
+  window.__ordiSkipDemos=false;connectProfile(intro.id);
+  assert(demo?.kind==='badge'&&!$('tutorialPanel').hidden,'Présentation proposée au début du premier badge');
+  finishDemo();assert(intro.introductionsShown.includes('Souris agile'),'Présentation mémorisée pour ce profil');
+  disconnectProfile();connectProfile(intro.id);assert(!demo,'Présentation déjà vue : reprise directe des missions');
+  window.__ordiSkipDemos=true;disconnectProfile();
+  showProfileMenu({clientX:100,clientY:100,preventDefault(){},stopPropagation(){}},intro);profileMenu.children[0].onclick();submitProfileDeletion();$('deleteProfileName').value=intro.name;submitProfileDeletion();submitProfileDeletion();
+  assert(!studentProfiles.some(p=>p.id===intro.id)&&studentProfiles.some(p=>p.id===first.id),'Seul le profil de présentation de test est retiré');
   report.ok=true;
  }catch(error){report.error=String(error.stack||error)}
  await window.__TAURI__.core.invoke('desktop_smoke_report',{report});
