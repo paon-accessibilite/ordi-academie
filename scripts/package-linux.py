@@ -29,7 +29,8 @@ packages = set()
 base = ['libwebkit2gtk-4.1-0', 'libgtk-3-0t64', 'libgstreamer-plugins-base1.0-0',
         'gstreamer1.0-plugins-base', 'gstreamer1.0-plugins-good', 'gstreamer1.0-pulseaudio',
         'libgdk-pixbuf-2.0-0', 'librsvg2-common', 'libasound2t64', 'libpulse0',
-        'libespeak-ng1', 'libstdc++6', 'fonts-dejavu-core', 'glib-networking']
+        'libespeak-ng1', 'libstdc++6', 'fonts-dejavu-core', 'fonts-noto-color-emoji', 'glib-networking',
+        'libegl-mesa0', 'libgl1-mesa-dri', 'libgbm1']
 for name in base:
     result = sp.check_output(['apt-rdepends', name], text=True, stderr=sp.DEVNULL)
     packages.update(line for line in result.splitlines() if line and not line[0].isspace())
@@ -114,9 +115,18 @@ export GDK_PIXBUF_MODULE_FILE="$base/loaders.cache"
 # Xfce utilise X11 ; évite les différences de pilotes EGL sur les vieux PC.
 export WEBKIT_DISABLE_DMABUF_RENDERER=1
 export WEBKIT_DISABLE_COMPOSITING_MODE=1
+export LIBGL_ALWAYS_SOFTWARE=1
+export LIBGL_DRIVERS_PATH="$runtime/usr/lib/x86_64-linux-gnu/dri"
+export __EGL_VENDOR_LIBRARY_FILENAMES="$runtime/usr/share/glvnd/egl_vendor.d/50_mesa.json"
+export FONTCONFIG_FILE="$base/fonts.conf"
 exec "$base/ordi-academie" "$@"
 ''')
 launcher.chmod(0o755)
+(private / 'fonts.conf').write_text('''<?xml version="1.0"?>
+<!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
+<fontconfig><include ignore_missing="yes">/etc/fonts/fonts.conf</include>
+<dir>/opt/oa01/runtime/usr/share/fonts</dir><cachedir prefix="xdg">fontconfig</cachedir></fontconfig>
+''')
 loaders = list(runtime.rglob('gdk-pixbuf-2.0/2.10.0/loaders/*.so'))
 query = '/usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/gdk-pixbuf-query-loaders'
 cache = sp.check_output([query, *map(str, loaders)], text=True)
