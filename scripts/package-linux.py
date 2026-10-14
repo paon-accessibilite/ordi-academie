@@ -17,7 +17,7 @@ root.mkdir()
 original = next(Path('src-tauri/target/release/bundle/deb').glob('*.deb'))
 run('dpkg-deb', '-x', str(original), str(root))
 run('dpkg-deb', '-e', str(original), str(root / 'DEBIAN'))
-private = root / 'opt/ordi-academie'
+private = root / 'opt/oa01'
 private.mkdir(parents=True)
 shutil.move(str(root / 'usr/bin/ordi-academie'), private / 'ordi-academie')
 # Le dossier de ressources Tauri est conservé à son emplacement standard.
@@ -57,12 +57,49 @@ for file in runtime.rglob('*'):
         if target.exists():
             file.unlink()
             file.symlink_to(os.path.relpath(target, file.parent))
+# Les binaires WebKit de distribution ignorent WEBKIT_EXEC_PATH.
+# Relocaliser leurs chemins compilés, sans changer les offsets ELF.
+# Un préfixe court permet de conserver exactement la taille de chaque chaîne.
+relocations = {
+    b'/usr/lib/x86_64-linux-gnu/webkit2gtk-4.1': b'/opt/oa01/wk',
+    b'/usr/share/webkitgtk-4.1': b'/opt/oa01/wd',
+    b'/usr/bin/bwrap': b'/opt/oa01/bw',
+    b'/usr/bin/xdg-dbus-proxy': b'/opt/oa01/dp',
+}
+import re
+patches = []
+for file in runtime.rglob('*'):
+    if not file.is_file() or file.is_symlink():
+        continue
+    with file.open('rb') as stream:
+        if stream.read(4) != b'\x7fELF':
+            continue
+    data = file.read_bytes()
+    initial = data
+    for old, new in relocations.items():
+        pattern = re.compile(re.escape(old) + rb'[^\x00]*\x00')
+        def relocate(match):
+            original = match.group(0)
+            replaced = new + original[len(old):]
+            return replaced + b'\x00' * (len(original) - len(replaced))
+        data = pattern.sub(relocate, data)
+    if data != initial:
+        file.write_bytes(data)
+        patches.append(str(file.relative_to(runtime)))
+for name, target in {
+    'wk': 'runtime/usr/lib/x86_64-linux-gnu/webkit2gtk-4.1',
+    'wd': 'runtime/usr/share/webkitgtk-4.1',
+    'bw': 'runtime/usr/bin/bwrap',
+    'dp': 'runtime/usr/bin/xdg-dbus-proxy',
+}.items():
+    (private / name).symlink_to(target)
 import json
 (private / 'runtime-manifest.json').write_text(json.dumps(manifest, indent=2))
+(private / 'relocated-binaries.json').write_text(json.dumps(patches, indent=2))
 launcher = root / 'usr/bin/ordi-academie'
 launcher.write_text('''#!/bin/sh
 set -eu
-base=/opt/ordi-academie
+base=/opt/oa01
 runtime="$base/runtime"
 libs="$runtime/usr/lib/x86_64-linux-gnu:$runtime/lib/x86_64-linux-gnu:$runtime/usr/lib:$runtime/lib:/usr/lib/ordi-academie/piper"
 export LD_LIBRARY_PATH="$libs${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
@@ -82,7 +119,7 @@ launcher.chmod(0o755)
 loaders = list(runtime.rglob('gdk-pixbuf-2.0/2.10.0/loaders/*.so'))
 query = '/usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/gdk-pixbuf-query-loaders'
 cache = sp.check_output([query, *map(str, loaders)], text=True)
-cache = cache.replace(str(runtime), '/opt/ordi-academie/runtime')
+cache = cache.replace(str(runtime), '/opt/oa01/runtime')
 (private / 'loaders.cache').write_text(cache)
 schemas = runtime / 'usr/share/glib-2.0/schemas'
 run('glib-compile-schemas', str(schemas))
