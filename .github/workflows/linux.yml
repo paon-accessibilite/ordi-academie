@@ -38,6 +38,4 @@ jobs:
       - name: Publication du téléchargement validé
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          version=$(node -p "require('./package.json').version")
-          gh release upload "v$version" "release/Ordi-Academie-$version-linux-amd64.deb" release/SHA256SUMS-linux.txt release/validation-linux.json
+        run: python3 scripts/upload-linux-release.py

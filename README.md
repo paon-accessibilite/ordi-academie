@@ -1,10 +1,10 @@
 # Ordi Academie
 
-## Version 0.3.0 Windows — à valider
+## Version 0.3.0 Windows et Linux
 
 59 missions. Dix présentations animées, commentées et sous-titrées dans le PC virtuel, avec lecture, pause, étapes et voix désactivable. Le bouton **Montre-moi** accompagne la création du premier dossier. Sélection multiple avec Ctrl + clic, Maj + clic, rectangle et Ctrl+A ; opérations sur les groupes (déplacement, copie, coupe, corbeille et restauration). Quatre nouvelles missions. Les profils existants et badges sont conservés.
 
-Cette version Windows reste locale jusqu’à validation. Aucune publication 0.3 ni compilation Linux.
+Windows 10/11 x64 et Linux Mint 22.3 Xfce amd64. Le paquet Linux contient ses bibliothèques graphiques et sa voix française hors ligne. [Téléchargements 0.3](https://github.com/paon-accessibilite/ordi-academie/releases/tag/v0.3.0).
 
 ## Versions publiées : Windows 0.2.0 et Linux 0.2.1
 
