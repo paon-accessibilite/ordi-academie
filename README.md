@@ -1,6 +1,8 @@
 # Ordi Academie
 
-## Version 0.3.0 Windows et Linux
+## Windows 0.3.0 et correctif Linux 0.3.1
+
+Le correctif Linux place les menus du clic droit dans la couche supérieure du navigateur et les conserve pendant les défilements de mise en page. La création et le renommage sont vérifiés avec des clics réels en plein écran sous Xfce.
 
 59 missions. Dix présentations animées, commentées et sous-titrées dans le PC virtuel, avec lecture, pause, étapes et voix désactivable. Le bouton **Montre-moi** accompagne la création du premier dossier. Sélection multiple avec Ctrl + clic, Maj + clic, rectangle et Ctrl+A ; opérations sur les groupes (déplacement, copie, coupe, corbeille et restauration). Quatre nouvelles missions. Les profils existants et badges sont conservés.
 

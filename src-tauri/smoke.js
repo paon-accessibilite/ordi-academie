@@ -1,7 +1,7 @@
 (async()=>{
  const checks=[];const assert=(value,label)=>{if(!value)throw Error(label);checks.push(label)};
  window.__ordiSkipDemos=true;
- const report={version:'0.3.0',ok:false,checks};
+ const report={version:'0.3.1',ok:false,checks};
  try{
   assert(missions.length===59,'59 missions chargées dans le moteur embarqué');
   assert(!$('loginScreen').hidden&&$('sessionShell').hidden,'Écran de connexion au démarrage');
@@ -66,9 +66,12 @@
     for(const name of ['pointerdown','pointerup','contextmenu','scroll'])document.addEventListener(name,trace,true);
     const native=await window.__TAURI__.core.invoke('desktop_smoke_right_click',{x:Math.round(rect.left+rect.width/2),y:Math.round(rect.top+rect.height/2)});
     if(!native)target.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,button:2,clientX:rect.left+10,clientY:rect.top+10}));
-    await new Promise(resolve=>setTimeout(resolve,150));
+    await new Promise(resolve=>setTimeout(resolve,900));
+    $('files').dispatchEvent(new Event('scroll'));
+    document.dispatchEvent(new Event('scroll'));
     for(const name of ['pointerdown','pointerup','contextmenu','scroll'])document.removeEventListener(name,trace,true);
-    assert(!contextMenu.hidden,'Clic droit : menu visible après le relâchement');
+    assert(!contextMenu.hidden,'Clic droit : menu maintenu après relâchement et défilement de mise en page');
+    if(typeof contextMenu.showPopover==='function')assert(contextMenu.matches(':popover-open'),'Menu dans la couche supérieure du navigateur');
     const item=contextMenu.children[0],hit=item.getBoundingClientRect();
     assert(contextMenu.contains(document.elementFromPoint(hit.left+hit.width/2,hit.top+hit.height/2)),'Menu au-dessus de la fenêtre et accessible au clic');
     return native;
@@ -84,15 +87,15 @@
   const blankPoint={getBoundingClientRect(){return {left:grid.right-28,top:grid.bottom-28,width:4,height:4}},dispatchEvent:event=>$('files').dispatchEvent(event)};
   report.nativeRightClick=await rightClick(blankPoint);
   assert(contextMenu.children[0].textContent==='Nouveau dossier','Clic droit dans Organisateur : Nouveau dossier');
-  await chooseMenuItem();assert($('dialog').open,'Clic droit ouvre la création de dossier');$('dialog').close();
+  await chooseMenuItem();assert($('dialog').open,'Clic droit ouvre la création de dossier');$('name').value='Animaux';$('form').requestSubmit();assert(completed&&entries.some(e=>sameName(e.name,'Animaux')),'Créer le dossier depuis le menu valide la mission');
   replayMission(basicStep(3));await rightClick(document.querySelector('.file[data-entry-id="photo"]'));
   assert(selected==='photo'&&contextMenu.children[0].textContent==='Renommer','Clic droit sur le fichier : Renommer');
-  await chooseMenuItem();assert($('dialog').open,'Clic droit ouvre le renommage');$('dialog').close();
+  await chooseMenuItem();assert($('dialog').open,'Clic droit ouvre le renommage');$('name').value='Chat';$('form').requestSubmit();assert(completed&&entries.find(e=>e.id==='photo').name==='Chat','Renommer depuis le menu valide la mission');
   documentDraft.dirty=false;replayMission(basicStep(2));showDialog('create');$('name').value='Animaux';$('form').onsubmit({preventDefault(){}});
   tell('Après la réussite');assert($('feedback').textContent.includes('Mission réussie'),'Réussite reste affichée');
   celebrateBadge('Premier bureau');assert($('badgeCelebration').open&&$('celebrationSkills').textContent.includes('sous-dossier'),'Félicitations avec compétences');
   $('collectBadge').onclick();assert(!$('badgeCelebration').open,'Collecte du badge');
-  assert(await window.__TAURI__.core.invoke('desktop_fullscreen',{enabled:null})===false,'Commande plein écran native');
+  report.fullscreen=await window.__TAURI__.core.invoke('desktop_fullscreen',{enabled:null});assert(report.fullscreen===report.nativeRightClick,'Linux en plein écran réel, Windows en fenêtre de test');
   report.voices=window.speechSynthesis?.getVoices().map(v=>({lang:v.lang,local:v.localService}))||[];
   const wav=await window.__TAURI__.core.invoke('desktop_speech',{text:'Bienvenue dans Ordi Académie. Crée un dossier.'});
   if(wav){

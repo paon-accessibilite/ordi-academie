@@ -1,6 +1,6 @@
 [package]
 name = "ordi-academie"
-version = "0.3.0"
+version = "0.3.1"
 description = "Ordi Academie - premiers gestes numeriques"
 authors = ["PAON"]
 edition = "2021"

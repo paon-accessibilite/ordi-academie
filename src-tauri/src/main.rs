@@ -22,7 +22,7 @@ fn main() {
             if let Some(path) = &smoke_report {
                 let parent = path.parent().ok_or("Le rapport de test doit avoir un dossier parent")?;
                 std::fs::create_dir_all(parent)?;
-                builder = builder.data_directory(parent.join("webview-test")).visible(cfg!(target_os = "linux")).fullscreen(false);
+                builder = builder.data_directory(parent.join("webview-test")).visible(cfg!(target_os = "linux")).fullscreen(cfg!(target_os = "linux"));
             }
             let window = builder.build()?;
             if smoke_report.is_some() {

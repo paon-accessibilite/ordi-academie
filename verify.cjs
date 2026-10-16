@@ -28,6 +28,7 @@ closeFileContextOutside({...blank,button:2});if(contextMenu.hidden)throw Error('
 closeContextMenu();$('files').onpointerup({...blank,button:2});if(contextMenu.hidden)throw Error('relâchement droit sans contextmenu');
 closeFileContextOutside({...blank,button:0});if(!contextMenu.hidden)throw Error('clic gauche extérieur ne ferme pas');
 $('files').oncontextmenu(blank);
+listeners.get('scroll')?.({target:$('files')});if(contextMenu.hidden)throw Error('défilement de mise en page referme le menu');
 if(!blank.prevented||contextMenu.hidden||contextMenu.children[0].textContent!=='Nouveau dossier')throw Error('menu espace vide');
 if(parseInt(contextMenu.style.left)+contextMenu.offsetWidth>1024)throw Error('menu hors écran');
 contextMenu.children[0].onclick(); if(!contextMenu.hidden)throw Error('fermeture menu');

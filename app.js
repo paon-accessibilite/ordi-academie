@@ -123,9 +123,11 @@ $('reset').onclick=()=>{if(!mayLeaveDocument())return;resetDocumentDraft();reset
 const contextMenu=document.createElement('div');
 contextMenu.id='contextMenu';contextMenu.className='context-menu';contextMenu.hidden=true;
 contextMenu.setAttribute('role','menu');contextMenu.setAttribute('aria-label','Actions sur les fichiers');
+// La couche native du navigateur garde le menu devant les fenêtres simulées.
+if(typeof contextMenu.showPopover==='function')contextMenu.setAttribute('popover','manual');
 document.body.append(contextMenu);
 let contextOrigin=null;
-function closeContextMenu(restoreFocus=false){contextMenu.hidden=true;if(restoreFocus&&contextOrigin)contextOrigin.focus()}
+function closeContextMenu(restoreFocus=false){if(typeof contextMenu.hidePopover==='function')contextMenu.hidePopover();contextMenu.hidden=true;if(restoreFocus&&contextOrigin)contextOrigin.focus({preventScroll:true})}
 function openContextMenu(ev,id=null){
   ev.preventDefault();ev.stopPropagation();contextOrigin=ev.target;
   if(!id||!selectionIds().includes(id))setFileSelection(id?[id]:[],false);
@@ -136,6 +138,7 @@ function openContextMenu(ev,id=null){
   if(id)$('status').textContent=displayName(entries.find(e=>e.id===id))+' sélectionné';
   actions.forEach(([label,kind])=>{const button=document.createElement('button');button.type='button';button.textContent=label;button.setAttribute('role','menuitem');button.onclick=()=>{closeContextMenu();if(kind==='copy')copySelected();else if(kind==='cut')cutSelected();else if(kind==='paste')pasteClipboard();else if(kind==='delete')deleteSelected();else if(kind==='restore')restoreSelected();else showDialog(kind)};contextMenu.append(button)});
   contextMenu.hidden=false;
+  if(typeof contextMenu.showPopover==='function')contextMenu.showPopover();
   const margin=8;
   contextMenu.style.left=Math.max(margin,Math.min(ev.clientX,document.documentElement.clientWidth-contextMenu.offsetWidth-margin))+'px';
   contextMenu.style.top=Math.max(margin,Math.min(ev.clientY,document.documentElement.clientHeight-contextMenu.offsetHeight-margin))+'px';
@@ -147,7 +150,8 @@ $('files').oncontextmenu=ev=>{const file=ev.target.closest('.file');openContextM
 $('files').onpointerup=ev=>{if(ev.button===2){const file=ev.target.closest('.file');openContextMenu(ev,file?file.dataset.entryId:null)}};
 function closeFileContextOutside(ev){if(ev.button!==2&&!contextMenu.contains(ev.target))closeContextMenu()}
 document.addEventListener('pointerdown',closeFileContextOutside);
-document.addEventListener('scroll',()=>closeContextMenu(),true);
+// Un scroll de mise en page/focus WebKitGTK ne doit pas effacer le menu.
+$('files').addEventListener('wheel',()=>closeContextMenu(),{passive:true});
 window.addEventListener('resize',()=>closeContextMenu());
 document.addEventListener('keydown',ev=>{
   if(demo)return;
