@@ -8,6 +8,8 @@ Le correctif Linux place les menus du clic droit dans la couche supérieure du n
 
 Windows 10/11 x64 et Linux Mint 22.3 Xfce amd64. Le paquet Linux contient ses bibliothèques graphiques et sa voix française hors ligne. [Téléchargements 0.3](https://github.com/paon-accessibilite/ordi-academie/releases/tag/v0.3.0).
 
+**Windows sans installation (0.3.1)** : [archive ZIP portable](https://github.com/paon-accessibilite/ordi-academie/releases/download/v0.3.1/Ordi-Academie-0.3.1-windows-x64-portable.zip), avec moteur WebView2 embarqué. Extraire tout, puis lancer **Ordi Academie.exe**. [Mode d'emploi](PORTABLE-WINDOWS.md). Les profils restent dans le compte Windows courant.
+
 ## Versions publiées : Windows 0.2.0 et Linux 0.2.1
 
 La version Linux 0.2.1 rétablit les menus du clic droit dans Organisateur,

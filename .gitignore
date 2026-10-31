@@ -8,5 +8,6 @@ scripts/github-local.py
 scripts/linux-ci-local.py
 src-tauri/gen/
 src-tauri/piper/
+src-tauri/WebView2/
 linux-build/
 __pycache__/

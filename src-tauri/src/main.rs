@@ -10,6 +10,8 @@ fn desktop_fullscreen(window: tauri::Window, enabled: Option<bool>) -> Result<bo
 }
 
 fn main() {
+    #[cfg(windows)]
+    prepare_portable_runtime();
     let arguments: Vec<String> = std::env::args().collect();
     let report = arguments.iter().position(|arg| arg == "--smoke-test")
         .and_then(|index| arguments.get(index + 1)).map(std::path::PathBuf::from);
@@ -39,6 +41,21 @@ fn main() {
         })
         .run(tauri::generate_context!())
         .expect("Impossible de démarrer Ordi Academie");
+}
+
+// Le moteur privé de la distribution ZIP doit être lisible par les processus
+// AppContainer de WebView2, y compris après extraction sur Windows 10.
+#[cfg(windows)]
+fn prepare_portable_runtime() {
+    use std::os::windows::process::CommandExt;
+    if let Some(folder) = std::env::current_exe().ok()
+        .and_then(|path| path.parent().map(|parent| parent.join("WebView2")))
+        .filter(|folder| folder.join("msedgewebview2.exe").is_file())
+    {
+        let _ = std::process::Command::new("icacls.exe")
+            .arg(folder).args(["/grant", "*S-1-15-2-2:(OI)(CI)(RX)", "*S-1-15-2-1:(OI)(CI)(RX)"])
+            .creation_flags(0x08000000).output();
+    }
 }
 
 // Test Linux : vrai clic X11, réservé au processus lancé avec --smoke-test.
@@ -109,6 +126,10 @@ fn desktop_smoke_report(app: tauri::AppHandle, state: tauri::State<'_, SmokeRepo
     use tauri::Manager;
     let path = state.0.as_ref().ok_or("Le mode test est désactivé")?;
     let mut report = report;
+    #[cfg(windows)]
+    if let Ok(folder) = std::env::var("WEBVIEW2_BROWSER_EXECUTABLE_FOLDER") {
+        report["webviewRuntimeFolder"] = folder.into();
+    }
     if let Some(window) = app.get_webview_window("main") {
         report["nativeTitle"] = window.title().map_err(|error| error.to_string())?.into();
     }

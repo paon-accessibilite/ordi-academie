@@ -2,7 +2,7 @@ Ordi Académie 0.1.0 — Notices des dépendances
 
 Ces notices couvrent les dépendances disponibles utilisées pour construire le moteur natif. Certaines ne sont pas liées dans le binaire Windows.
 
-Microsoft Edge WebView2 Runtime est livré via son installeur officiel, qui contient ses propres conditions et notices.
+Microsoft Edge WebView2 Runtime est livré via son installeur officiel pour la version installable, ou en distribution Fixed Version officielle pour le ZIP portable. Le moteur contient ses propres conditions et notices, conservées dans les distributions.
 
 
 ========================================================================
